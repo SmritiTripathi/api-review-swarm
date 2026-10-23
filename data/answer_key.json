@@ -1,0 +1,173 @@
+[
+  {
+    "id": "D01",
+    "category": "pagination",
+    "severity": 2,
+    "location": "GET /developer/v1/cards/physical",
+    "what_changed": "Removed pagination parameters ['start', 'page_size'] from this list endpoint",
+    "why_it_matters": "Clients cannot page through large result sets, risking truncated or oversized responses",
+    "detection_hint": "Should note that this list endpoint has no pagination or limit parameters"
+  },
+  {
+    "id": "D02",
+    "category": "naming",
+    "severity": 2,
+    "location": "GET /developer/v1/cards/virtual",
+    "what_changed": "Query parameter 'user_id' renamed to 'userId' (camelCase), while the API uses snake_case elsewhere",
+    "why_it_matters": "Inconsistent naming makes the API harder to learn and easy to call incorrectly",
+    "detection_hint": "Should note that 'userId' uses camelCase, inconsistent with snake_case parameters elsewhere"
+  },
+  {
+    "id": "D03",
+    "category": "naming",
+    "severity": 2,
+    "location": "GET /developer/v1/transactions",
+    "what_changed": "Query parameter 'order_by_amount_asc' renamed to 'orderByAmountAsc' (camelCase), while the API uses snake_case elsewhere",
+    "why_it_matters": "Inconsistent naming makes the API harder to learn and easy to call incorrectly",
+    "detection_hint": "Should note that 'orderByAmountAsc' uses camelCase, inconsistent with snake_case parameters elsewhere"
+  },
+  {
+    "id": "D04",
+    "category": "errors",
+    "severity": 2,
+    "location": "DELETE /developer/v1/cards/physical/{card_id}/suspension",
+    "what_changed": "Removed documented error responses ['400']",
+    "why_it_matters": "Developers cannot tell what failures to expect or how to handle them",
+    "detection_hint": "Should note that this operation documents no 4xx/5xx error responses"
+  },
+  {
+    "id": "D05",
+    "category": "errors",
+    "severity": 2,
+    "location": "PATCH /developer/v1/cards/physical/{card_id}",
+    "what_changed": "Removed documented error responses ['400']",
+    "why_it_matters": "Developers cannot tell what failures to expect or how to handle them",
+    "detection_hint": "Should note that this operation documents no 4xx/5xx error responses"
+  },
+  {
+    "id": "D06",
+    "category": "documentation",
+    "severity": 1,
+    "location": "POST /developer/v1/cards/vault",
+    "what_changed": "Removed the operation's description",
+    "why_it_matters": "Behavior, constraints and side effects are no longer explained",
+    "detection_hint": "Should note that this operation has no description or explanation beyond its summary"
+  },
+  {
+    "id": "D07",
+    "category": "documentation",
+    "severity": 1,
+    "location": "GET /developer/v1/cards/vault/{card_id}",
+    "what_changed": "Removed the operation's description",
+    "why_it_matters": "Behavior, constraints and side effects are no longer explained",
+    "detection_hint": "Should note that this operation has no description or explanation beyond its summary"
+  },
+  {
+    "id": "D08",
+    "category": "agent-readiness",
+    "severity": 2,
+    "location": "GET /developer/v1/reimbursements parameter 'to_transaction_date'",
+    "what_changed": "Replaced the parameter description with the vague text 'Data.'",
+    "why_it_matters": "Humans and AI agents must guess what the parameter means and which values are valid",
+    "detection_hint": "Should note that parameter 'to_transaction_date' has an uninformative description"
+  },
+  {
+    "id": "D09",
+    "category": "agent-readiness",
+    "severity": 2,
+    "location": "GET /developer/v1/transactions/{transaction_id} parameter 'include_merchant_data'",
+    "what_changed": "Replaced the parameter description with the vague text 'Data.'",
+    "why_it_matters": "Humans and AI agents must guess what the parameter means and which values are valid",
+    "detection_hint": "Should note that parameter 'include_merchant_data' has an uninformative description"
+  },
+  {
+    "id": "D10",
+    "category": "security",
+    "severity": 3,
+    "location": "POST /developer/v1/reimbursements/mileage",
+    "what_changed": "Set security to an empty list, declaring this write operation as requiring no authentication",
+    "why_it_matters": "A state-changing endpoint appears publicly callable",
+    "detection_hint": "Should flag that this write operation declares no authentication or authorization"
+  },
+  {
+    "id": "D11",
+    "category": "errors",
+    "severity": 1,
+    "location": "GET /developer/v1/cards/physical/{card_id}",
+    "what_changed": "Changed this GET operation's success status code from 200 to 201 (Created)",
+    "why_it_matters": "Status codes should match HTTP semantics; 201 implies a resource was created",
+    "detection_hint": "Should note that a read-only GET returns 201 Created, which is semantically wrong"
+  },
+  {
+    "id": "D12",
+    "category": "errors",
+    "severity": 2,
+    "location": "POST /developer/v1/cards/physical response 400",
+    "what_changed": "Replaced the 400 error response with a plain string body, unlike error shapes elsewhere",
+    "why_it_matters": "Inconsistent error formats force clients to special-case error handling",
+    "detection_hint": "Should note that the 400 response is an unstructured string, inconsistent with other errors"
+  },
+  {
+    "id": "D13",
+    "category": "documentation",
+    "severity": 3,
+    "location": "GET /developer/v1/cards/virtual/{card_id}",
+    "what_changed": "Changed summary from 'Fetch a virtual card' to 'Permanently delete this resource' on a read-only GET",
+    "why_it_matters": "The summary contradicts the operation's actual behavior and is dangerous to trust",
+    "detection_hint": "Should note that the summary says delete but the operation is a GET read"
+  },
+  {
+    "id": "D14",
+    "category": "schema-design",
+    "severity": 2,
+    "location": "components.schemas.ApiMileageReimbursementCreateRequestBody",
+    "what_changed": "Removed 'distance' from the required fields",
+    "why_it_matters": "Clients may omit a field that the server actually needs, causing avoidable errors",
+    "detection_hint": "Should note that 'distance' looks essential but is not marked required in ApiMileageReimbursementCreateRequestBody"
+  },
+  {
+    "id": "D15",
+    "category": "schema-design",
+    "severity": 2,
+    "location": "components.schemas.ApiPhysicalCardCreateResourceRequestBody",
+    "what_changed": "Removed 'shipping_address' from the required fields",
+    "why_it_matters": "Clients may omit a field that the server actually needs, causing avoidable errors",
+    "detection_hint": "Should note that 'shipping_address' looks essential but is not marked required in ApiPhysicalCardCreateResourceRequestBody"
+  },
+  {
+    "id": "D16",
+    "category": "schema-design",
+    "severity": 2,
+    "location": "components.schemas.Transaction.properties.sync_status",
+    "what_changed": "Removed the enum constraint (allowed values ['NOT_SYNC_READY', 'SYNCED', 'SYNC_READY']...), leaving a free-form string",
+    "why_it_matters": "Valid values are no longer discoverable from the spec",
+    "detection_hint": "Should note that 'sync_status' is an unconstrained string with no listed valid values"
+  },
+  {
+    "id": "D17",
+    "category": "schema-design",
+    "severity": 2,
+    "location": "components.schemas.SingleTransaction.properties.amount",
+    "what_changed": "Changed type of 'amount' from number to string",
+    "why_it_matters": "Money values typed as strings invite parsing errors and inconsistency with other amount fields",
+    "detection_hint": "Should note that amount field 'amount' is a string while amounts elsewhere are numeric"
+  },
+  {
+    "id": "D18",
+    "category": "security",
+    "severity": 3,
+    "location": "components.schemas.CardShipping.properties.full_card_number",
+    "what_changed": "Added a 'full_card_number' field to a card object",
+    "why_it_matters": "Returning full card numbers in ordinary API responses is a serious data-exposure risk",
+    "detection_hint": "Should flag that a card response exposes the full card number"
+  },
+  {
+    "id": "D19",
+    "category": "naming",
+    "severity": 2,
+    "location": "/developer/v1/reimbursement/submit-receipt",
+    "what_changed": "Renamed path '/developer/v1/reimbursements/submit-receipt' to the singular form '/developer/v1/reimbursement/submit-receipt', while sibling paths stay plural",
+    "why_it_matters": "Inconsistent resource naming makes URLs unpredictable",
+    "detection_hint": "Should note that '/developer/v1/reimbursement/submit-receipt' uses a singular resource name while related paths are plural"
+  }
+]
