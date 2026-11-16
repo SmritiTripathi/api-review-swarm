@@ -1,0 +1,311 @@
+{
+  "method": "baseline",
+  "model": "claude-haiku-5-5",
+  "spec": "data/spec_flawed.json",
+  "timestamp": "20261116-114835",
+  "usage": {
+    "input_tokens": 71214,
+    "output_tokens": 5478
+  },
+  "stop_reason": "tool_use",
+  "seconds": 22.2,
+  "findings": [
+    {
+      "title": "Vault GET endpoint returns full PAN and CVV without extra gating",
+      "location": "GET /developer/v1/cards/vault/{card_id}",
+      "category": "security",
+      "severity": 3,
+      "evidence": "Responds with CardDetails containing pan and cvv, documented only as 'Fetch a card's sensitive details' with scope cards:read_vault and no description, warning, or PCI note.",
+      "suggested_fix": "Document the sensitivity, PCI scope, and caching restrictions in the description, and mark pan/cvv as sensitive in the schema.",
+      "id": "B01"
+    },
+    {
+      "title": "Vault POST mixes spend-limit creation with sensitive detail retrieval",
+      "location": "POST /developer/v1/cards/vault",
+      "category": "documentation",
+      "severity": 3,
+      "evidence": "Summary 'Create a spend limit and retrieve sensitive card details' returns PCILimit including card.pan and card.cvv, yet the 201 response is the only place these are exposed and there is no description.",
+      "suggested_fix": "Split into separate operations or add a description explaining what is created, what is returned, and that PAN/CVV appear only in this response.",
+      "id": "B02"
+    },
+    {
+      "title": "Mileage reimbursement POST has empty security with 401 response",
+      "location": "POST /developer/v1/reimbursements/mileage",
+      "category": "security",
+      "severity": 3,
+      "evidence": "'security': [] overrides the global auth, yet the operation documents a 401 Unauthorized response and no scope.",
+      "suggested_fix": "Declare the oauth2 requirement with reimbursements:write, or explain why the endpoint is unauthenticated.",
+      "id": "B03"
+    },
+    {
+      "title": "Virtual card GET summary says 'Permanently delete this resource'",
+      "location": "GET /developer/v1/cards/virtual/{card_id}",
+      "category": "documentation",
+      "severity": 3,
+      "evidence": "Operation is GET with summary 'Permanently delete this resource' and a 200 response 'Get single virtual card'.",
+      "suggested_fix": "Change the summary to 'Fetch a virtual card' and check whether a DELETE operation was intended.",
+      "id": "B04"
+    },
+    {
+      "title": "Physical card GET returns 201 instead of 200",
+      "location": "GET /developer/v1/cards/physical/{card_id}",
+      "category": "consistency",
+      "severity": 2,
+      "evidence": "Responses declare '201': Success for the GET operation, while the list GET returns 200.",
+      "suggested_fix": "Change the success response to 200 for the GET operation.",
+      "id": "B05"
+    },
+    {
+      "title": "Physical card POST error response is untyped string",
+      "location": "POST /developer/v1/cards/physical",
+      "category": "errors",
+      "severity": 2,
+      "evidence": "400 response content schema is {\"type\":\"string\"} with description 'Error', unlike other operations that use DeveloperApiErrorResponse.",
+      "suggested_fix": "Use the DeveloperApiErrorResponse schema and add the x-trace-id header as on other 400 responses.",
+      "id": "B06"
+    },
+    {
+      "title": "Several operations lack documented error responses",
+      "location": "PATCH /developer/v1/cards/physical/{card_id}, POST /developer/v1/cards/physical/{card_id}/suspension (no 401/404), GET /developer/v1/cards/virtual, GET /developer/v1/cards/virtual/{card_id}, PATCH /developer/v1/transactions/{transaction_id}, GET /developer/v1/reimbursements/{reimbursement_id}",
+      "category": "errors",
+      "severity": 2,
+      "evidence": "These operations define only 200 (and sometimes 400), with no 401, 403, 404 or error schema, while other operations do.",
+      "suggested_fix": "Add consistent 401/403/404 responses with DeveloperApiErrorResponse across all operations.",
+      "id": "B07"
+    },
+    {
+      "title": "Unsuspend uses DELETE on a sub-resource with no request body",
+      "location": "DELETE /developer/v1/cards/physical/{card_id}/suspension",
+      "category": "naming",
+      "severity": 1,
+      "evidence": "Paired POST suspension is documented as revertable, but DELETE has no description and no 404 or 409 cases for already-unsuspended cards.",
+      "suggested_fix": "Add a description and idempotency/error behavior for both suspend and unsuspend.",
+      "id": "B08"
+    },
+    {
+      "title": "Terminate card documented as 'irreversible' but no confirmation semantics",
+      "location": "DELETE /developer/v1/cards/physical/{card_id}",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "Description 'Please note that this action is irreversible.' with 204 response and no 404 or repeat-call behavior documented.",
+      "suggested_fix": "State the effect on linked funds and transactions, and document behavior on repeat calls.",
+      "id": "B09"
+    },
+    {
+      "title": "Inconsistent query parameter casing in virtual cards list",
+      "location": "GET /developer/v1/cards/virtual",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "Parameter 'userId' is camelCase while siblings are snake_case (user_id, entity_id, is_terminated, page_size).",
+      "suggested_fix": "Rename to user_id, keeping userId as a deprecated alias if needed.",
+      "id": "B10"
+    },
+    {
+      "title": "Inconsistent sort parameter naming in transactions list",
+      "location": "GET /developer/v1/transactions",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "'orderByAmountAsc' is camelCase while 'order_by_amount_desc' and 'order_by_date_asc' are snake_case.",
+      "suggested_fix": "Rename to order_by_amount_asc and deprecate the camelCase name.",
+      "id": "B11"
+    },
+    {
+      "title": "Transactions sort parameters are mutually-exclusive but not enforced",
+      "location": "GET /developer/v1/transactions",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "Description says 'setting multiple ordering parameters is unsupported', but no schema or oneOf constrains it and the 400 response does not name the case.",
+      "suggested_fix": "Document the error returned when multiple ordering params are set, or reject them via a documented error code.",
+      "id": "B12"
+    },
+    {
+      "title": "Dangerous-sounding filter 'requires_memo' only accepts true",
+      "location": "GET /developer/v1/transactions",
+      "category": "schema-design",
+      "severity": 1,
+      "evidence": "Description says 'This can only be set to true.' but the schema is a plain boolean, so false is accepted and has unspecified behavior.",
+      "suggested_fix": "Use an enum [true] or document what false does.",
+      "id": "B13"
+    },
+    {
+      "title": "Pagination styles are inconsistent across list endpoints",
+      "location": "GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "Virtual cards and reimbursements use DeveloperAPINestedPage with only 'next', while transactions use DeveloperAPICountedPage with total_count; physical cards have no page_size or start parameters at all.",
+      "suggested_fix": "Make pagination parameters and page objects consistent across all list endpoints, or document each list's pagination model.",
+      "id": "B14"
+    },
+    {
+      "title": "Pagination 'start' cursor described as last entity ID but ambiguous",
+      "location": "GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions",
+      "category": "pagination",
+      "severity": 1,
+      "evidence": "start: 'The ID of the last entity of the previous page', typed as an unconstrained string; the example next link is a placeholder 'https://api.ramp.com/developer/v1/<resources>?<new_params>'.",
+      "suggested_fix": "Give concrete cursor semantics and a real example for next, and state whether clients should follow next or build the query.",
+      "id": "B15"
+    },
+    {
+      "title": "Physical card list lacks pagination parameters despite paginated response",
+      "location": "GET /developer/v1/cards/physical",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "Operation id is 'get_physical_card_list_with_pagination' and response is PaginatedResponseApiPhysicalCardResource, but no start or page_size parameter is declared.",
+      "suggested_fix": "Add start and page_size parameters, or remove the pagination claim from the operation id and response.",
+      "id": "B16"
+    },
+    {
+      "title": "Default page_size documented range inconsistent with schema",
+      "location": "GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions",
+      "category": "schema-design",
+      "severity": 1,
+      "evidence": "Description says 'between 2 and 100' but the schema has only default 20 with no minimum or maximum.",
+      "suggested_fix": "Add minimum: 2 and maximum: 100 to the schema.",
+      "id": "B17"
+    },
+    {
+      "title": "Date-time filters on reimbursements have undefined meaning",
+      "location": "GET /developer/v1/reimbursements",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "'to_transaction_date' has description 'Data.' and 'from_date'/'to_date' are documented only as 'created'. 'Filter by underlying transaction date (after this date)' conflicts with 'from_transaction_date'.",
+      "suggested_fix": "Replace placeholder descriptions and clarify whether bounds are inclusive and which timezone applies.",
+      "id": "B18"
+    },
+    {
+      "title": "Placeholder 'Data.' descriptions on parameters",
+      "location": "GET /developer/v1/transactions/{transaction_id}, GET /developer/v1/reimbursements (to_transaction_date)",
+      "category": "documentation",
+      "severity": 1,
+      "evidence": "Parameter include_merchant_data on GET transaction and to_transaction_date are described only as 'Data.'.",
+      "suggested_fix": "Write a real description for each parameter.",
+      "id": "B19"
+    },
+    {
+      "title": "Reimbursement list is missing a user_id description and mixed filters",
+      "location": "GET /developer/v1/reimbursements",
+      "category": "documentation",
+      "severity": 1,
+      "evidence": "Parameter 'user_id' has no description, while 'reimbursee_id' is used in the POST body for the same concept.",
+      "suggested_fix": "Add a description and align the naming with reimbursee_id.",
+      "id": "B20"
+    },
+    {
+      "title": "Naming inconsistency: reimbursee_id vs user_id vs spend_allocation_id",
+      "location": "POST /developer/v1/reimbursements/mileage, POST /developer/v1/reimbursement/submit-receipt",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "Mileage body uses 'spend_allocation_id' for a fund id, 'reimbursement' uses 'fund_id' and 'spend_limit_id', and the receipt endpoint path is singular 'reimbursement' while other paths are plural.",
+      "suggested_fix": "Use one name for the fund concept (fund_id) and one plural path prefix, deprecating the aliases.",
+      "id": "B21"
+    },
+    {
+      "title": "Deprecated aliases still in use in responses and filters",
+      "location": "Transaction schema limit_id, Reimbursement spend_limit_id, Transaction amount/currency_code",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Transaction limit_id is marked deprecated yet is still required; amount is deprecated type number while SingleTransaction redefines amount as string.",
+      "suggested_fix": "Remove deprecated fields from required lists and make the type of amount consistent between Transaction and SingleTransaction.",
+      "id": "B22"
+    },
+    {
+      "title": "Transaction amount type differs between schemas",
+      "location": "components.schemas.SingleTransaction.properties.amount vs components.schemas.Transaction.properties.amount",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Transaction defines amount as type 'number' while SingleTransaction defines the same field as type 'string'.",
+      "suggested_fix": "Use one type for the same field across schemas.",
+      "id": "B23"
+    },
+    {
+      "title": "Money amounts mix units and types across endpoints",
+      "location": "components.schemas.CurrencyAmount, ApiSignedAmount, ApiReimbursementAmount, CurrencyAmountRequestBody",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Some amounts use {amount, currency_code}, some {value, currency}, and ApiSignedAmount allows negative values while ApiReimbursementAmount requires non-negative value; the required lists also differ.",
+      "suggested_fix": "Standardize on one money object shape and document sign rules once.",
+      "id": "B24"
+    },
+    {
+      "title": "minor_unit_conversion_rate required but nullable in several schemas",
+      "location": "components.schemas.CurrencyAmount, Transaction, Reimbursement",
+      "category": "schema-design",
+      "severity": 1,
+      "evidence": "CurrencyAmount requires minor_unit_conversion_rate but marks it nullable and readOnly, and the request-side CurrencyAmountRequestBody omits it.",
+      "suggested_fix": "Document when it is null and make required and nullable consistent.",
+      "id": "B25"
+    },
+    {
+      "title": "Transaction split endpoint PATCH is marked destructive but lacks idempotency and error details",
+      "location": "PATCH /developer/v1/transactions/{transaction_id}",
+      "category": "idempotency",
+      "severity": 2,
+      "evidence": "Description says it 'create[s] or replace[s]' the split and has x-destructive: true, but there are no 400, 404, or 409 responses and no documented behavior for a retry.",
+      "suggested_fix": "Document error cases and retry semantics for the replace-split behavior.",
+      "id": "B26"
+    },
+    {
+      "title": "Idempotency key defined inconsistently across endpoints",
+      "location": "POST /developer/v1/cards/vault (header X-Idempotency-Key), POST /developer/v1/reimbursement/submit-receipt (body idempotency_key)",
+      "category": "idempotency",
+      "severity": 2,
+      "evidence": "The vault header is optional with no retry guidance, while the receipt endpoint requires an idempotency_key body field; other POST endpoints (create physical card, mileage reimbursement) have no idempotency mechanism at all.",
+      "suggested_fix": "Use one idempotency mechanism (header) across all POST endpoints and document retry behavior.",
+      "id": "B27"
+    },
+    {
+      "title": "Receipt upload request body schema is inconsistent with required fields",
+      "location": "components.schemas.ApiReimbursementUploadReceiptRequestRequestBody",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "reimbursement_id is optional but description says 'If omitted, a new draft reimbursement will be created via OCR', while reimbursee_id is required even when a reimbursement_id is passed.",
+      "suggested_fix": "Clarify when reimbursee_id is required and document the conflict if both are provided.",
+      "id": "B28"
+    },
+    {
+      "title": "Enum value mismatch between enum and description for reimbursement state",
+      "location": "components.schemas.Reimbursement.properties.state",
+      "category": "documentation",
+      "severity": 1,
+      "evidence": "Both PUSH_PAYMENT_FAILED and EXPORT_FAILED are described as 'Payment failed', and REIMBURSED and REIMBURSED_VIA_PUSH are both 'Paid'.",
+      "suggested_fix": "Give each state a distinct description.",
+      "id": "B29"
+    },
+    {
+      "title": "Transaction sk_category_id enum includes unconfirmed gaps and conflicting type",
+      "location": "components.schemas.Transaction.properties.sk_category_id, GET /developer/v1/transactions sk_category_id",
+      "category": "schema-design",
+      "severity": 1,
+      "evidence": "Example sk_category_id is the string \"40,41\" while the schema type is integer; enum skips 22 with no explanation.",
+      "suggested_fix": "Fix the example to a single integer and document the missing 22.",
+      "id": "B30"
+    },
+    {
+      "title": "Vault create returns 201 but PATCH/update endpoints use 200 unevenly",
+      "location": "POST /developer/v1/cards/vault, PATCH /developer/v1/cards/physical/{card_id}",
+      "category": "consistency",
+      "severity": 1,
+      "evidence": "Creation returns 201 on vault and 200 on physical card POST, and the vault response is PCILimit whose schema name does not match the operation.",
+      "suggested_fix": "Return 201 for all creates and name the response schema consistently.",
+      "id": "B31"
+    },
+    {
+      "title": "Tag 'transactions' duplicates 'Transaction' tag",
+      "location": "tags array and PATCH /developer/v1/transactions/{transaction_id}",
+      "category": "naming",
+      "severity": 1,
+      "evidence": "Tags include both 'Transaction' and lowercase 'transactions', and the PATCH operation carries both.",
+      "suggested_fix": "Remove the duplicate tag and use one canonical name.",
+      "id": "B32"
+    },
+    {
+      "title": "Physical card display_name listed as required but read-only and possibly absent",
+      "location": "components.schemas.PhysicalCard",
+      "category": "schema-design",
+      "severity": 1,
+      "evidence": "required includes 'display_name' and 'expiration', both readOnly, while the PATCH body allows setting display_name.",
+      "suggested_fix": "Remove read-only fields from required lists or clarify how they are populated for unactivated cards.",
+      "id": "B33"
+    }
+  ]
+}
