@@ -1,20 +1,20 @@
 defect_id,category,location,detection_hint,finding_ids,verdict,notes
-D01,pagination,GET /developer/v1/cards/physical,Should note that this list endpoint has no pagination or limit parameters,B16,Hit,
-D02,naming,GET /developer/v1/cards/virtual,"Should note that 'userId' uses camelCase, inconsistent with snake_case parameters elsewhere",B10,Hit,
-D03,naming,GET /developer/v1/transactions,"Should note that 'orderByAmountAsc' uses camelCase, inconsistent with snake_case parameters elsewhere",B11,Hit,
-D04,errors,DELETE /developer/v1/cards/physical/{card_id}/suspension,Should note that this operation documents no 4xx/5xx error responses,B08,Hit,
-D05,errors,PATCH /developer/v1/cards/physical/{card_id},Should note that this operation documents no 4xx/5xx error responses,B07,Hit,
-D06,documentation,POST /developer/v1/cards/vault,Should note that this operation has no description or explanation beyond its summary,B02,Partial,"Missing the catch on “Summary 'Create a spend limit and retrieve sensitive card details' returns PCILimit including card.pan and card.cvv, yet the 201 response is the only place these are exposed"""
-D07,documentation,GET /developer/v1/cards/vault/{card_id},Should note that this operation has no description or explanation beyond its summary,B01,Partial,"Missing catch on “Responds with CardDetails containing pan and cvv, documented only as 'Fetch a card's sensitive details' with scope cards:read_vault and no description, warning, or PCI note.”"
-D08,agent-readiness,GET /developer/v1/reimbursements parameter 'to_transaction_date',Should note that parameter 'to_transaction_date' has an uninformative description,B18,Partial,"Baseline caught more detailed reason “'to_transaction_date' has description 'Data.' and 'from_date'/'to_date' are documented only as 'created'. 'Filter by underlying transaction date (after this date)' conflicts with 'from_transaction_date'.""”"
-D09,agent-readiness,GET /developer/v1/transactions/{transaction_id} parameter 'include_merchant_data',Should note that parameter 'include_merchant_data' has an uninformative description,B19,Hit,
-D10,security,POST /developer/v1/reimbursements/mileage,Should flag that this write operation declares no authentication or authorization,B03,Hit,
-D11,errors,GET /developer/v1/cards/physical/{card_id},"Should note that a read-only GET returns 201 Created, which is semantically wrong",B05,Partial,The category in baseline is ‘Consistency’
-D12,errors,POST /developer/v1/cards/physical response 400,"Should note that the 400 response is an unstructured string, inconsistent with other errors",B06,Hit,
-D13,documentation,GET /developer/v1/cards/virtual/{card_id},Should note that the summary says delete but the operation is a GET read,B04,Hit,
-D14,schema-design,components.schemas.ApiMileageReimbursementCreateRequestBody,Should note that 'distance' looks essential but is not marked required in ApiMileageReimbursementCreateRequestBody,,,
-D15,schema-design,components.schemas.ApiPhysicalCardCreateResourceRequestBody,Should note that 'shipping_address' looks essential but is not marked required in ApiPhysicalCardCreateResourceRequestBody,,,
-D16,schema-design,components.schemas.Transaction.properties.sync_status,Should note that 'sync_status' is an unconstrained string with no listed valid values,,,
-D17,schema-design,components.schemas.SingleTransaction.properties.amount,Should note that amount field 'amount' is a string while amounts elsewhere are numeric,,,
-D18,security,components.schemas.CardShipping.properties.full_card_number,Should flag that a card response exposes the full card number,,,
-D19,naming,/developer/v1/reimbursement/submit-receipt,Should note that '/developer/v1/reimbursement/submit-receipt' uses a singular resource name while related paths are plural,,,
+D01,pagination,GET /developer/v1/cards/physical,Should note that this list endpoint has no pagination or limit parameters,B16,hit,
+D02,naming,GET /developer/v1/cards/virtual,"Should note that 'userId' uses camelCase, inconsistent with snake_case parameters elsewhere",B10,hit,
+D03,naming,GET /developer/v1/transactions,"Should note that 'orderByAmountAsc' uses camelCase, inconsistent with snake_case parameters elsewhere",B11,hit,
+D04,errors,DELETE /developer/v1/cards/physical/{card_id}/suspension,Should note that this operation documents no 4xx/5xx error responses,B08,hit,
+D05,errors,PATCH /developer/v1/cards/physical/{card_id},Should note that this operation documents no 4xx/5xx error responses,B07,hit,
+D06,documentation,POST /developer/v1/cards/vault,Should note that this operation has no description or explanation beyond its summary,B02,hit,Stated in evidence: 'there is no description'
+D07,documentation,GET /developer/v1/cards/vault/{card_id},Should note that this operation has no description or explanation beyond its summary,B01,hit,Stated in evidence: 'no description'
+D08,agent-readiness,GET /developer/v1/reimbursements parameter 'to_transaction_date',Should note that parameter 'to_transaction_date' has an uninformative description,B18 B19,hit,Both quote the 'Data.' description
+D09,agent-readiness,GET /developer/v1/transactions/{transaction_id} parameter 'include_merchant_data',Should note that parameter 'include_merchant_data' has an uninformative description,B19,hit,
+D10,security,POST /developer/v1/reimbursements/mileage,Should flag that this write operation declares no authentication or authorization,B03,hit,
+D11,errors,GET /developer/v1/cards/physical/{card_id},"Should note that a read-only GET returns 201 Created, which is semantically wrong",B05,hit,Category label differs (consistency); not scored
+D12,errors,POST /developer/v1/cards/physical response 400,"Should note that the 400 response is an unstructured string, inconsistent with other errors",B06,hit,
+D13,documentation,GET /developer/v1/cards/virtual/{card_id},Should note that the summary says delete but the operation is a GET read,B04,hit,
+D14,schema-design,components.schemas.ApiMileageReimbursementCreateRequestBody,Should note that 'distance' looks essential but is not marked required in ApiMileageReimbursementCreateRequestBody,,miss,
+D15,schema-design,components.schemas.ApiPhysicalCardCreateResourceRequestBody,Should note that 'shipping_address' looks essential but is not marked required in ApiPhysicalCardCreateResourceRequestBody,,miss,
+D16,schema-design,components.schemas.Transaction.properties.sync_status,Should note that 'sync_status' is an unconstrained string with no listed valid values,,miss,
+D17,schema-design,components.schemas.SingleTransaction.properties.amount,Should note that amount field 'amount' is a string while amounts elsewhere are numeric,B23,hit,Found in schema section
+D18,security,components.schemas.CardShipping.properties.full_card_number,Should flag that a card response exposes the full card number,,miss,
+D19,naming,/developer/v1/reimbursement/submit-receipt,Should note that '/developer/v1/reimbursement/submit-receipt' uses a singular resource name while related paths are plural,B21,hit,Mentioned at end of a naming finding
