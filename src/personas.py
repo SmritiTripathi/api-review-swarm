@@ -102,7 +102,7 @@ Rules:
 Attribute rows (JSON):
 {rows}
 
-Return the personas with the report_personas tool."""
+Return the personas in the required format."""
 
 
 def build_rows(seed):
