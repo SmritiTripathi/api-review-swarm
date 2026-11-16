@@ -61,7 +61,7 @@ Recall is *pending* until the scorer is built. Token and latency figures come fr
 
 | Method | Model | Findings (raw) | Recall | Total input tokens | Cached share | Billed-input equivalent¹ | Output tokens | Latency | Run file |
 |---|---|--:|--:|--:|--:|--:|--:|--:|---|
-| Baseline | claude-haiku-5-5 | 34 | pending | 71,214 | 0% | 71,214 | 5,283 | 22.9 s | `baseline_claude-haiku-5-5_20261023-172240.json` |
+| Baseline | claude-haiku-5-5 | 33 | pending | 71,214 | 0% | 71,214 | 5,478 | 22.2 s | `baseline_claude-haiku-5-5_20261116-114835.json` |
 | Swarm (6 personas) | claude-haiku-5-5 | 87 | pending | 428,841 | 99% | 128,162 | 18,100 | 29.2 s | `swarm_claude-haiku-5-5_20261116-130554.json` |
 | Baseline | claude-sonnet-5-5 | | | | | | | | not yet run |
 | Swarm (6 personas) | claude-sonnet-5-5 | | | | | | | | not yet run |
