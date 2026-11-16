@@ -87,7 +87,11 @@ def call_structured(model, system, user, tool, max_tokens=16000, retries=4):
         kwargs["output_config"] = {"format": {
             "type": "json_schema", "schema": strict_schema(tool["input_schema"])}}
     else:
-        kwargs["tools"] = [tool]
+        # strict: True makes the API enforce the schema on the tool input.
+        # Without it the model can return wrong types (e.g. a string where an
+        # object belongs). Strict mode needs the same additionalProperties rule.
+        kwargs["tools"] = [{**tool, "strict": True,
+                            "input_schema": strict_schema(tool["input_schema"])}]
         kwargs["tool_choice"] = {"type": "tool", "name": tool["name"]}
 
     for attempt in range(retries):
@@ -118,6 +122,10 @@ def call_structured(model, system, user, tool, max_tokens=16000, retries=4):
             raise RuntimeError(f"No structured output returned (stop_reason={resp.stop_reason})")
         result = block.input
 
+    # With prompt caching, input is split three ways. input_tokens alone is
+    # only the uncached part; total input = all three added together.
     usage = {"input_tokens": resp.usage.input_tokens,
+             "cache_write_tokens": resp.usage.cache_creation_input_tokens or 0,
+             "cache_read_tokens": resp.usage.cache_read_input_tokens or 0,
              "output_tokens": resp.usage.output_tokens}
     return result, usage, resp.stop_reason

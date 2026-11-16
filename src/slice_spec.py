@@ -54,7 +54,7 @@ def main():
 
     # Rebuild components containing only what is needed.
     components = {}
-    for ref in seen:
+    for ref in sorted(seen):
         parts = ref[2:].split("/")  # e.g. ['components', 'schemas', 'Card']
         if parts[0] != "components" or len(parts) < 3:
             continue
