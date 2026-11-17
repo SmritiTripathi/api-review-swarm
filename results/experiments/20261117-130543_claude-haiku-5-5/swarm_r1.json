@@ -1,0 +1,1830 @@
+{
+  "method": "swarm",
+  "model": "claude-haiku-5-5",
+  "spec": "data/spec_flawed.json",
+  "personas_file": "data/personas.json",
+  "max_findings": 15,
+  "timestamp": "20261117-130645",
+  "usage": {
+    "input_tokens": 4353,
+    "cache_write_tokens": 70748,
+    "cache_read_tokens": 353740,
+    "output_tokens": 18025
+  },
+  "seconds": 28.2,
+  "failed": [],
+  "reviews": [
+    {
+      "persona": "P1",
+      "name": "Priya N.",
+      "usage": {
+        "input_tokens": 729,
+        "cache_write_tokens": 70748,
+        "cache_read_tokens": 0,
+        "output_tokens": 2757
+      },
+      "stop_reason": "tool_use",
+      "seconds": 12.4,
+      "dropped": 0,
+      "findings": [
+        {
+          "title": "GET physical card by ID returns 201 instead of 200",
+          "location": "GET /developer/v1/cards/physical/{card_id}",
+          "category": "consistency",
+          "severity": 3,
+          "evidence": "responses: \"201\": {\"description\":\"Success\", schema PhysicalCard}; there is no 200 response, while sibling GET endpoints return 200.",
+          "suggested_fix": "Change the success response code to 200 so generated clients handle the success path.",
+          "id": "P1-01",
+          "persona": "P1"
+        },
+        {
+          "title": "Physical card POST and PATCH lack documented error responses",
+          "location": "POST /developer/v1/cards/physical and PATCH /developer/v1/cards/physical/{card_id}",
+          "category": "errors",
+          "severity": 2,
+          "evidence": "POST responses only list 200 and 400 with a plain string schema, \"schema\":{\"type\":\"string\"}; PATCH lists only 200. Neither documents 401, 404, or the DeveloperApiErrorResponse shape used elsewhere.",
+          "suggested_fix": "Use DeveloperApiErrorResponse for every 4xx and document 401 and 404 on these operations.",
+          "id": "P1-02",
+          "persona": "P1"
+        },
+        {
+          "title": "Physical card POST 400 body is untyped string",
+          "location": "POST /developer/v1/cards/physical, response 400",
+          "category": "errors",
+          "severity": 2,
+          "evidence": "\"400\": {\"description\":\"Error\",\"content\":{\"application/json\":{\"schema\":{\"type\":\"string\"}}}}, while other 400 responses use DeveloperApiErrorResponse with error_v2.",
+          "suggested_fix": "Replace the string schema with $ref DeveloperApiErrorResponse and a description of the failure cases.",
+          "id": "P1-03",
+          "persona": "P1"
+        },
+        {
+          "title": "Many operations have no error responses at all",
+          "location": "PATCH /developer/v1/cards/physical/{card_id}, POST /developer/v1/cards/physical/{card_id}/suspension (partly), DELETE /developer/v1/cards/physical/{card_id}/suspension, GET /developer/v1/cards/virtual/{card_id}, GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/reimbursements/{reimbursement_id}, POST /developer/v1/cards/vault",
+          "category": "errors",
+          "severity": 2,
+          "evidence": "These operations define only success responses (e.g., GET /developer/v1/cards/virtual/{card_id} has only \"200\"; GET /developer/v1/reimbursements has only \"200\"). Failures like 404 or 401 are undocumented.",
+          "suggested_fix": "Add 401, 403, 404 (where a resource is fetched by ID) and 400 responses referencing DeveloperApiErrorResponse to every operation.",
+          "id": "P1-04",
+          "persona": "P1"
+        },
+        {
+          "title": "Virtual card GET by ID has wrong summary",
+          "location": "GET /developer/v1/cards/virtual/{card_id}",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "\"summary\":\"Permanently delete this resource\" on a GET operation whose description is \"Get single virtual card\".",
+          "suggested_fix": "Change the summary to something like \"Fetch a virtual card\"; the text currently describes deletion.",
+          "id": "P1-05",
+          "persona": "P1"
+        },
+        {
+          "title": "Inconsistent query parameter casing for user filter",
+          "location": "GET /developer/v1/cards/virtual (userId) vs GET /developer/v1/cards/physical (user_id) and GET /developer/v1/reimbursements (user_id)",
+          "category": "naming",
+          "severity": 2,
+          "evidence": "Virtual cards list uses \"name\":\"userId\"; the other list endpoints use \"user_id\". Transactions also has orderByAmountAsc alongside order_by_amount_desc.",
+          "suggested_fix": "Rename userId to user_id; also rename orderByAmountAsc to order_by_amount_asc, keeping a deprecated alias if needed.",
+          "id": "P1-06",
+          "persona": "P1"
+        },
+        {
+          "title": "Virtual card list lacks include_count and paging pattern differences",
+          "location": "GET /developer/v1/cards/virtual and GET /developer/v1/cards/physical",
+          "category": "pagination",
+          "severity": 2,
+          "evidence": "Virtual list uses start/page_size with page_size default 20 and no min/max in schema; physical list has no start or page_size parameters at all, yet returns PaginatedResponseApiPhysicalCardResource with a next link.",
+          "suggested_fix": "Document start and page_size on the physical card list and state the same 2 to 100 bounds on both endpoints.",
+          "id": "P1-07",
+          "persona": "P1"
+        },
+        {
+          "title": "Transaction state filter and default behavior conflict with sibling",
+          "location": "GET /developer/v1/transactions, parameter state",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "Description says \"If state is not set, all transactions except declined transactions will be returned,\" but the state enum includes \"ALL\" and the parameter description says \"If set to 'ALL', all transactions including 'DECLINED' will be listed.\" The default for state is not stated in the schema.",
+          "suggested_fix": "Add an explicit default value to the schema and state in one place how declined transactions are included.",
+          "id": "P1-08",
+          "persona": "P1"
+        },
+        {
+          "title": "Reimbursement list defaults and enum docs differ from transaction list",
+          "location": "GET /developer/v1/reimbursements, parameter direction",
+          "category": "consistency",
+          "severity": 1,
+          "evidence": "direction has \"default\":\"BUSINESS_TO_USER\" but the description says \"(BUSINESS_TO_USER default ...)\"; the transactions list has no equivalent default. Also state enum lists values with no explanation in the description.",
+          "suggested_fix": "Keep defaults in the schema only and use consistent description wording across list endpoints.",
+          "id": "P1-09",
+          "persona": "P1"
+        },
+        {
+          "title": "Overlapping sync filters on reimbursements with unclear precedence",
+          "location": "GET /developer/v1/reimbursements, parameters sync_status, sync_ready, has_no_sync_commits",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "sync_status: \"Supersedes has_no_sync_commits and sync_ready.\" but sync_ready and has_no_sync_commits remain as separate boolean params with no deprecation marker.",
+          "suggested_fix": "Mark sync_ready and has_no_sync_commits as deprecated in the spec, or document the combined behavior.",
+          "id": "P1-10",
+          "persona": "P1"
+        },
+        {
+          "title": "Reimbursement direction in the list endpoint has no required-ness",
+          "location": "GET /developer/v1/reimbursements, parameter user_id",
+          "category": "documentation",
+          "severity": 1,
+          "evidence": "The user_id query parameter has no description, unlike all other parameters on the same operation.",
+          "suggested_fix": "Add a description stating what user_id filters (reimbursee or submitter).",
+          "id": "P1-11",
+          "persona": "P1"
+        },
+        {
+          "title": "Transaction amount fields have inconsistent types and deprecations",
+          "location": "Transaction.amount and SingleTransaction.amount",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "Transaction.amount is \"type\":\"number\" while SingleTransaction.amount is \"type\":\"string\", both marked deprecated: \"Deprecated. Use entity_amount.\"",
+          "suggested_fix": "Make both the same type and mark it deprecated consistently; a generated client currently gets a number from one endpoint and a string from the other.",
+          "id": "P1-12",
+          "persona": "P1"
+        },
+        {
+          "title": "Required fields that are nullable or often absent",
+          "location": "Transaction and SingleTransaction required list; PhysicalCard required list",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "PhysicalCard requires \"display_name\",\"expiration\",\"fulfillment\" but its properties say display_name and expiration are readOnly and fulfillment is nullable: true. Transaction requires \"entity_amount\" and \"entity_id\", both nullable: true in its properties.",
+          "suggested_fix": "Make required fields match nullability, either non-nullable or removed from required, so typed clients don't fail on null.",
+          "id": "P1-13",
+          "persona": "P1"
+        },
+        {
+          "title": "Mileage reimbursement POST has empty security and no 400 response",
+          "location": "POST /developer/v1/reimbursements/mileage",
+          "category": "security",
+          "severity": 3,
+          "evidence": "\"security\":[] overrides the global oauth2 requirement, and responses define only 200 and 401 with no 400 or scope listed.",
+          "suggested_fix": "Confirm whether this endpoint should be unauthenticated; if not, set the reimbursements:write scope and document 400 errors.",
+          "id": "P1-14",
+          "persona": "P1"
+        }
+      ]
+    },
+    {
+      "persona": "P2",
+      "name": "Marcus T.",
+      "usage": {
+        "input_tokens": 718,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 70748,
+        "output_tokens": 3677
+      },
+      "stop_reason": "tool_use",
+      "seconds": 15.8,
+      "dropped": 0,
+      "findings": [
+        {
+          "title": "Card vault PAN/CVV returned with no declared protection",
+          "location": "components.schemas.CardDetails.properties.pan / cvv; GET /developer/v1/cards/vault/{card_id}",
+          "category": "security",
+          "severity": 3,
+          "evidence": "CardDetails has pan (\"Primary account number(PAN) of the card.\") and cvv with no security or sensitivity marking; GET /developer/v1/cards/vault/{card_id} is secured only by oauth2 [\"cards:read_vault\"] and documents no additional controls. PhysicalCard.shipping.full_card_number is also a plain string.",
+          "suggested_fix": "Mark pan/cvv/full_card_number as sensitive (x-sensitive or description), require a stronger scope or step-up, and document response caching restrictions.",
+          "id": "P2-01",
+          "persona": "P2"
+        },
+        {
+          "title": "Mutating operations lack security requirement",
+          "location": "POST /developer/v1/reimbursements/mileage",
+          "category": "security",
+          "severity": 3,
+          "evidence": "\"security\":[] on the operation, and it creates a reimbursement payable to reimbursee_id with no oauth2 scope.",
+          "suggested_fix": "Declare oauth2 with reimbursements:write like other reimbursement write operations, or document why it is public.",
+          "id": "P2-02",
+          "persona": "P2"
+        },
+        {
+          "title": "Financial write endpoints not idempotent by default",
+          "location": "POST /developer/v1/cards/vault; POST /developer/v1/cards/physical; POST /developer/v1/reimbursements/mileage",
+          "category": "idempotency",
+          "severity": 2,
+          "evidence": "Only POST /cards/vault declares optional X-Idempotency-Key header. POST /reimbursements/mileage and POST /cards/physical have no key; the receipt upload uses a body idempotency_key, a different mechanism.",
+          "suggested_fix": "Use one idempotency mechanism (header) consistently across all POST endpoints and mark it required for money-moving or card-issuing calls.",
+          "id": "P2-03",
+          "persona": "P2"
+        },
+        {
+          "title": "Idempotency key location inconsistent between endpoints",
+          "location": "POST /developer/v1/reimbursement/submit-receipt, requestBody idempotency_key",
+          "category": "consistency",
+          "severity": 2,
+          "evidence": "ApiReimbursementUploadReceiptRequestRequestBody has required \"idempotency_key\" in the multipart body, while POST /developer/v1/cards/vault uses header X-Idempotency_key (optional, maxLength 255, minLength 1). The receipt key has no length limit.",
+          "suggested_fix": "Move the key to an X-Idempotency-Key header with the same maxLength/minLength constraints and make it consistent across endpoints.",
+          "id": "P2-04",
+          "persona": "P2"
+        },
+        {
+          "title": "Inconsistent resource path naming: reimbursement vs reimbursements",
+          "location": "POST /developer/v1/reimbursement/submit-receipt",
+          "category": "naming",
+          "severity": 2,
+          "evidence": "Path uses singular \"reimbursement\" while all other reimbursement paths use \"/developer/v1/reimbursements\" and \"/developer/v1/reimbursements/{reimbursement_id}\"; \"submit-receipt\" is a kebab-case verb segment unlike other paths.",
+          "suggested_fix": "Rename to /developer/v1/reimbursements/receipts or similar plural noun path.",
+          "id": "P2-05",
+          "persona": "P2"
+        },
+        {
+          "title": "User identifier parameter named inconsistently",
+          "location": "GET /developer/v1/cards/virtual (userId); GET /developer/v1/reimbursements (user_id); GET /developer/v1/cards/physical (user_id)",
+          "category": "naming",
+          "severity": 2,
+          "evidence": "Virtual cards list uses query \"userId\" (camelCase), while physical cards, reimbursements, and transactions use \"user_id\".",
+          "suggested_fix": "Rename userId to user_id in GET /cards/virtual.",
+          "id": "P2-06",
+          "persona": "P2"
+        },
+        {
+          "title": "Sort parameters use inconsistent naming conventions",
+          "location": "GET /developer/v1/transactions, query orderByAmountAsc vs order_by_amount_desc",
+          "category": "naming",
+          "severity": 2,
+          "evidence": "\"orderByAmountAsc\" is camelCase while \"order_by_date_asc\", \"order_by_date_desc\", and \"order_by_amount_desc\" are snake_case. Two ascending/descending parameters are separate booleans, so both may be sent.",
+          "suggested_fix": "Use one snake_case scheme such as order_by_amount_asc, and use a single enum parameter (e.g. sort=date_desc) instead of mutually exclusive booleans.",
+          "id": "P2-07",
+          "persona": "P2"
+        },
+        {
+          "title": "Pagination parameters and page shapes differ across list endpoints",
+          "location": "GET /developer/v1/cards/virtual; GET /developer/v1/transactions",
+          "category": "pagination",
+          "severity": 2,
+          "evidence": "Virtual cards and reimbursements take start/page_size, but virtual card page_size has no min/max constraint in schema (spec text says 2-100 only in description); PaginatedResponseApiVirtualCardResource page has only next, while transactions page includes total_count and total_count_capped. Physical cards list has no page_size or start parameters at all.",
+          "suggested_fix": "Apply the same start/page_size schema (minimum 2, maximum 100) to every list endpoint and document the same page object shape.",
+          "id": "P2-08",
+          "persona": "P2"
+        },
+        {
+          "title": "Transaction state filter enum mixes filter and resource semantics",
+          "location": "GET /developer/v1/transactions, parameter state; components.schemas.Transaction.properties.state",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "Query state enum includes \"ALL\", which is not a transaction state but a filter value, yet Transaction.state enum also includes \"ALL\" as a returned value. Response state can never legitimately be ALL.",
+          "suggested_fix": "Separate the filter enum from the resource enum; remove ALL from the Transaction.state schema.",
+          "id": "P2-09",
+          "persona": "P2"
+        },
+        {
+          "title": "Date-time filter parameters lack timezone and inconsistent semantics",
+          "location": "GET /developer/v1/reimbursements, to_transaction_date / from_date / updated_after",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "to_transaction_date has description \"Data.\" (no meaning). from_transaction_date says \"after this date\" while from_date is \"created after\" and transaction endpoints say \"user_transaction_time after\"; description for from_date/to_date formats do not state inclusivity or timezone.",
+          "suggested_fix": "Replace placeholder descriptions and define inclusive/exclusive bounds and timezone (ISO8601 with offset) for every date filter.",
+          "id": "P2-10",
+          "persona": "P2"
+        },
+        {
+          "title": "Placeholder descriptions on parameters",
+          "location": "GET /developer/v1/reimbursements, to_transaction_date; GET /developer/v1/transactions/{transaction_id}, include_merchant_data",
+          "category": "documentation",
+          "severity": 1,
+          "evidence": "to_transaction_date description: \"Data.\"; include_merchant_data (path transactions/{transaction_id}) description: \"Data.\"",
+          "suggested_fix": "Describe what each parameter filters or includes.",
+          "id": "P2-11",
+          "persona": "P2"
+        },
+        {
+          "title": "Monetary amounts are unbounded numbers and floats",
+          "location": "components.schemas.Transaction.properties.amount; ApiCardVaultCreationRequestBody; CurrencyAmountRequestBody.amount; ApiAccountingSplitLineItemRequestBody.amount",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "Transaction.amount is \"type\":\"number\" (float) and is deprecated; CurrencyAmountRequestBody.amount and ApiAccountingSplitLineItemRequestBody.amount are integer with no minimum; ApiAccountingSplitLineItemRequestBody.amount says \"Amount in minor units\" but accepts negative values, and the spend limit limit has no minimum.",
+          "suggested_fix": "Use integer minor units everywhere, add minimum:0 where negative values are invalid, and state the constraint on spending limit amounts.",
+          "id": "P2-12",
+          "persona": "P2"
+        },
+        {
+          "title": "Free-text and reference strings lack length limits",
+          "location": "components.schemas.ApiMileageReimbursementCreateRequestBody.properties.memo; ApiCardVaultCreationRequestBody.display_name; ApiPhysicalCardUpdateResourceRequestBody.display_name; ApiTransactionsUpdateRequestBody line item memo",
+          "category": "schema-design",
+          "severity": 1,
+          "evidence": "memo, display_name, and line-item memo are \"type\":\"string\" with no maxLength; ApiReimbursementUploadReceiptRequest idempotency_key also has no maxLength, unlike the header in POST /cards/vault (maxLength 255).",
+          "suggested_fix": "Add maxLength to all free-text string fields and align the idempotency key limits.",
+          "id": "P2-13",
+          "persona": "P2"
+        },
+        {
+          "title": "Card identifiers typed as unformatted string while others are uuid",
+          "location": "GET /developer/v1/cards/physical/{card_id}; PATCH /developer/v1/cards/vault/{card_id}; GET /developer/v1/cards/vault/{card_id}; DELETE/GET/PATCH card paths",
+          "category": "consistency",
+          "severity": 1,
+          "evidence": "Path parameter card_id is {\"type\":\"string\"} with no format, while the same card id is format uuid in query params (e.g. transaction card_id, PhysicalCard.id, PCICardDetails.id). Reimbursement_id and transaction_id path parameters are also untyped strings.",
+          "suggested_fix": "Declare path IDs with format uuid (or document the actual format) consistently.",
+          "id": "P2-14",
+          "persona": "P2"
+        },
+        {
+          "title": "Physical card deletion and suspension lack consistent verbs",
+          "location": "DELETE /developer/v1/cards/physical/{card_id}; GET /developer/v1/cards/virtual/{card_id}",
+          "category": "naming",
+          "severity": 1,
+          "evidence": "DELETE /cards/physical/{card_id} is summarized \"Terminate a card\"; GET /cards/virtual/{card_id} is summarized \"Permanently delete this resource\" while returning 200 with a VirtualCard. Suspension uses POST and DELETE on a \"/suspension\" sub-resource.",
+          "suggested_fix": "Correct the GET summary to \"Fetch a virtual card\" and align terminology (terminate vs delete) across card endpoints.",
+          "id": "P2-15",
+          "persona": "P2"
+        },
+        {
+          "title": "Error responses undocumented or inconsistently typed",
+          "location": "POST /developer/v1/cards/physical; PATCH /developer/v1/cards/physical/{card_id}; GET /developer/v1/cards/virtual/{card_id}",
+          "category": "errors",
+          "severity": 2,
+          "evidence": "POST /cards/physical 400 response schema is type string while other 400s use DeveloperApiErrorResponse; PATCH /cards/physical/{card_id} and GET /cards/virtual/{card_id} document no 400/401/404 responses; the POST /cards/vault 201 vs GET /cards/physical/{card_id} 201 status code is inconsistent with other 200s.",
+          "suggested_fix": "Use DeveloperApiErrorResponse for all error responses and document consistent success codes.",
+          "id": "P2-16",
+          "persona": "P2"
+        }
+      ]
+    },
+    {
+      "persona": "P3",
+      "name": "Dana R.",
+      "usage": {
+        "input_tokens": 710,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 70748,
+        "output_tokens": 3141
+      },
+      "stop_reason": "tool_use",
+      "seconds": 14.2,
+      "dropped": 0,
+      "findings": [
+        {
+          "title": "Transaction amount fields have no unit or currency guarantee",
+          "location": "components.schemas.Transaction.properties.amount",
+          "category": "schema-design",
+          "severity": 3,
+          "evidence": "\"amount\":{\"deprecated\":true,\"description\":\"Deprecated. Use `entity_amount`.\",\"type\":\"number\"} while SingleTransaction.amount is typed \"type\":\"string\"",
+          "suggested_fix": "Declare one type for `amount` in both Transaction and SingleTransaction and state its unit (major units, e.g. dollars) in the description.",
+          "id": "P3-01",
+          "persona": "P3"
+        },
+        {
+          "title": "Split line item amount unit is stated but sign and range are not",
+          "location": "PATCH /developer/v1/transactions/{transaction_id} - ApiAccountingSplitLineItemRequestBody.amount",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "\"amount\":{\"description\":\"Amount in minor units (e.g. 5000 = $50.00).\",\"type\":\"integer\"} with no minimum; the parent says line item amounts must sum to the transaction amount, which may be negative for refunds",
+          "suggested_fix": "Document allowed sign and range (e.g. minimum, negative refund handling) and whether the minor unit depends on currency (e.g. JPY has no minor units).",
+          "id": "P3-02",
+          "persona": "P3"
+        },
+        {
+          "title": "Spend limit amounts lack minor unit and currency constraints on requests",
+          "location": "components.schemas.CurrencyAmountRequestBody.amount and currency_code",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "\"amount\":{\"description\":\"the amount of money represented in the smallest denomination...\",\"type\":\"integer\"} with no minimum; \"currency_code\":{\"default\":\"USD\",\"type\":\"string\"} with no enum, unlike ApiSignedAmount.currency which has a full ISO 4217 enum",
+          "suggested_fix": "Add minimum (e.g. 1 for positive limits), and constrain currency_code to the same ISO 4217 enum used elsewhere.",
+          "id": "P3-03",
+          "persona": "P3"
+        },
+        {
+          "title": "Reimbursement entity_amount/payee_amount units differ across schemas",
+          "location": "components.schemas.ApiReimbursementAmount.value vs CurrencyAmount.amount vs ApiReimbursementLineItem.amount",
+          "category": "consistency",
+          "severity": 2,
+          "evidence": "ApiReimbursementAmount uses \"value\" with minimum 0 and \"minor_unit_conversion_rate\"; CurrencyAmount uses \"amount\" and marks minor_unit_conversion_rate required and nullable; ApiSignedAmount uses \"value\" with no minimum",
+          "suggested_fix": "Use one amount shape (name, unit, nullability, sign rule) across all monetary fields, or document each variant's unit explicitly.",
+          "id": "P3-04",
+          "persona": "P3"
+        },
+        {
+          "title": "Mileage distance has no units constraint or range in response",
+          "location": "components.schemas.Reimbursement.distance and ApiMileageReimbursementCreateRequestBody.distance_units",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "Reimbursement: \"distance\":{\"description\":\"The distance of the reimbursement in miles, for mileage reimbursements.\",\"type\":\"number\"}; request accepts \"distance_units\":{\"enum\":[\"KILOMETERS\",\"MILES\"]} but the response has no distance unit field and always says miles",
+          "suggested_fix": "Return distance_units alongside distance, or state the response is always miles; add minimum 0 to distance and document the oneOf decimal/number type.",
+          "id": "P3-05",
+          "persona": "P3"
+        },
+        {
+          "title": "Timestamps lack format and timezone in several fields",
+          "location": "components.schemas.Reimbursement.created_at, submitted_at, approved_at; examples like \"2023-08-20T:00:00+00:00\"; ApiReimbursementLineItem transaction_date",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "Example values such as \"created_at\":\"2023-08-20T:00:00+00:00\" are not valid ISO 8601 (stray colon, no time); Reimbursement.transaction_date is \"format\":\"date\" while from_date filters are \"format\":\"date-time\"",
+          "suggested_fix": "Fix examples to valid RFC 3339 values and state the timezone the server uses for date and date-time filters.",
+          "id": "P3-06",
+          "persona": "P3"
+        },
+        {
+          "title": "Date filter semantics ambiguous for transactions and reimbursements",
+          "location": "GET /developer/v1/reimbursements - to_transaction_date, description \"Data.\"; GET /developer/v1/transactions - from_date/to_date",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "\"description\":\"Data.\" on to_transaction_date; from_transaction_date says \"(after this date)\" while to_date says \"before\" with no inclusive/exclusive or timezone stated; transaction from_date is described as user_transaction_time",
+          "suggested_fix": "Replace \"Data.\" with a real description and state inclusive/exclusive bounds and the timezone for each date filter.",
+          "id": "P3-07",
+          "persona": "P3"
+        },
+        {
+          "title": "Pagination size limit is inconsistent and undocumented for max on virtual cards",
+          "location": "GET /developer/v1/cards/virtual - page_size",
+          "category": "pagination",
+          "severity": 2,
+          "evidence": "\"page_size\" description on virtual cards and reimbursements: \"The value must be between 2 and 100\" but schema has only \"default\":20 with no minimum/maximum; virtual cards list has no page_size bounds enforced in schema, and the 'start' parameter is typed string with no format",
+          "suggested_fix": "Add minimum 2 and maximum 100 to page_size in every list endpoint schema, and state what happens when out of range (error code).",
+          "id": "P3-08",
+          "persona": "P3"
+        },
+        {
+          "title": "Pagination token and next-page link format is undefined",
+          "location": "components.schemas.DeveloperAPINestedPage.next and query parameter start",
+          "category": "pagination",
+          "severity": 2,
+          "evidence": "\"next\":{\"description\":\"the query to get to the next page; it is in the format of <BASE_URL>?<new_params>\"}; \"start\":{\"description\":\"The ID of the last entity of the previous page...\",\"type\":\"string\"}",
+          "suggested_fix": "Document that the start value is opaque or give its exact format, and describe what happens when next is null.",
+          "id": "P3-09",
+          "persona": "P3"
+        },
+        {
+          "title": "Count fields only present when include_count is set; cap behavior unclear",
+          "location": "GET /developer/v1/transactions - include_count and DeveloperAPICountedPage.total_count",
+          "category": "pagination",
+          "severity": 1,
+          "evidence": "\"total_count\":{\"description\":\"... Null when include_count is not set, or when the count could not be computed in time.\",\"nullable\":true,\"type\":\"integer\"}",
+          "suggested_fix": "State the timeout behavior and retry expectation; the null meaning is overloaded across two conditions.",
+          "id": "P3-10",
+          "persona": "P3"
+        },
+        {
+          "title": "Physical card list filters on state with no documented enum",
+          "location": "GET /developer/v1/cards/physical - include_activated_only and include_terminated_only",
+          "category": "documentation",
+          "severity": 1,
+          "evidence": "\"include_activated_only\":\"Filter only for activated cards. Defaults to True if not specified\" and \"include_terminated_only\" defaults to False; no combined behavior is specified when both are set",
+          "suggested_fix": "Define the result when both flags are true or false and whether terminated/unactivated cards are returned by default.",
+          "id": "P3-11",
+          "persona": "P3"
+        },
+        {
+          "title": "Reimbursement state filter documented but trace_id and funding_source nullability unclear",
+          "location": "components.schemas.Reimbursement.trace_id and funding_source",
+          "category": "schema-design",
+          "severity": 1,
+          "evidence": "\"trace_id\" is \"allOf\" ApiReimbursementTraceId with \"description\":\"... This field is returned on reimbursement detail responses.\" but list responses omit it; \"funding_source\" is nullable enum with the note \"Null means the funding source could not be determined\"",
+          "suggested_fix": "State explicitly in the list response docs that trace_id is absent, and document when funding_source is null versus PENDING.",
+          "id": "P3-12",
+          "persona": "P3"
+        },
+        {
+          "title": "Vault card creation response uses 201 but lacks error responses for limits",
+          "location": "POST /developer/v1/cards/vault - responses",
+          "category": "errors",
+          "severity": 1,
+          "evidence": "Responses list 201 and 400 only; security scopes include \"limits:write\" but no 401/403 defined, unlike mileage and receipt endpoints which list 401",
+          "suggested_fix": "Add 401 and 403 responses with DeveloperApiErrorResponse for consistency across endpoints.",
+          "id": "P3-13",
+          "persona": "P3"
+        },
+        {
+          "title": "Idempotency is inconsistent across write endpoints",
+          "location": "POST /developer/v1/cards/vault (header X-Idempotency-Key) vs POST /developer/v1/reimbursement/submit-receipt (body idempotency_key, required)",
+          "category": "idempotency",
+          "severity": 2,
+          "evidence": "Vault: \"X-Idempotency-Key\" header, \"required\":false; Receipt upload: \"idempotency_key\" required body field with description \"Caller-supplied key that makes upload retries idempotent.\"; other POSTs (physical cards, mileage) have no idempotency mechanism at all",
+          "suggested_fix": "Use one mechanism (header) on all create endpoints, make it required where retries can duplicate spend or payouts, and document the retention window and conflict behavior.",
+          "id": "P3-14",
+          "persona": "P3"
+        }
+      ]
+    },
+    {
+      "persona": "P4",
+      "name": "Helen O.",
+      "usage": {
+        "input_tokens": 720,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 70748,
+        "output_tokens": 2777
+      },
+      "stop_reason": "tool_use",
+      "seconds": 12.4,
+      "dropped": 0,
+      "findings": [
+        {
+          "title": "Approval states for reimbursements lack plain-language meaning",
+          "location": "components.schemas.Reimbursement.properties.state and GET /developer/v1/reimbursements state filter",
+          "category": "documentation",
+          "severity": 3,
+          "evidence": "Enum values such as 'INIT', 'PENDING', 'APPROVED', 'AWAITING_PAYMENT', 'PROCESSING', 'MANUALLY_REIMBURSED' appear with short labels like 'Init' and 'Payment Processing' but no explanation of what triggers each state or which is final.",
+          "suggested_fix": "Add a description for each state stating whether it is pending, approved, paid, or terminal, and what action moves it to the next state.",
+          "id": "P4-01",
+          "persona": "P4"
+        },
+        {
+          "title": "Transaction approval_status values are undefined",
+          "location": "GET /developer/v1/transactions query parameter approval_status",
+          "category": "documentation",
+          "severity": 3,
+          "evidence": "Enum: 'AWAITING_EMPLOYEE', 'AWAITING_EMPLOYEE_CHANGES_REQUESTED', 'AWAITING_REVIEWER', 'FULLY_APPROVED', etc., with no x-enum-descriptions and no description of who must act next.",
+          "suggested_fix": "Add x-enum-descriptions defining each approval_status, including who must act and what happens after each step.",
+          "id": "P4-02",
+          "persona": "P4"
+        },
+        {
+          "title": "No approval or audit trail fields on transactions or reimbursements",
+          "location": "components.schemas.Transaction and components.schemas.Reimbursement",
+          "category": "other",
+          "severity": 3,
+          "evidence": "Properties include only timestamps such as 'updated_at' and 'synced_at'; there is no field showing who approved, who rejected, or when approval happened for a transaction, and Reimbursement has 'approved_at' but no approver identity.",
+          "suggested_fix": "Add approved_by, approved_at, and a history/audit array identifying the actor and time for each approval action.",
+          "id": "P4-03",
+          "persona": "P4"
+        },
+        {
+          "title": "Reimbursement 'amount' and 'entity_amount' meaning unclear",
+          "location": "components.schemas.Reimbursement.properties.entity_amount, merchant_amount, payee_amount",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "entity_amount: 'The amount that the payor entity pays, in the entity's settlement currency.' merchant_amount: 'The amount originally submitted...'. payee_amount: 'Amount and currency received by the payee.' No statement of how a currency conversion or fee affects these, and no direct total field.",
+          "suggested_fix": "State explicitly which amount is the approved total for compliance reporting and how fees or FX differences are reflected between these three fields.",
+          "id": "P4-04",
+          "persona": "P4"
+        },
+        {
+          "title": "Transaction 'amount' is deprecated but still the only plain value",
+          "location": "components.schemas.Transaction.properties.amount and SingleTransaction.properties.amount",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "'amount': {'deprecated': true, 'description': 'Deprecated. Use `entity_amount`.'}; in SingleTransaction it is typed as 'string' while in Transaction it is 'number'.",
+          "suggested_fix": "Fix the type inconsistency between Transaction and SingleTransaction and state the removal date for amount.",
+          "id": "P4-05",
+          "persona": "P4"
+        },
+        {
+          "title": "Signed amounts: sign convention not defined for reports",
+          "location": "components.schemas.ApiSignedAmount.properties.value and Transaction.properties.entity_amount",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "'May be negative for refunds or credits.' and 'signed: refunds and credits can be negative.' No statement of whether a positive value means a charge or whether card spend is reported as positive or negative.",
+          "suggested_fix": "State the sign convention explicitly, e.g. 'Positive = money out of the business; negative = refund or credit.'",
+          "id": "P4-06",
+          "persona": "P4"
+        },
+        {
+          "title": "Transaction 'updated_at' is an approximation",
+          "location": "components.schemas.Transaction.properties.updated_at",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "'Approximate transaction updated timestamp used by the `updated_after` filter. Computed as the latest of user transaction time, settlement time, and transaction interaction state update time.'",
+          "suggested_fix": "Remove 'approximate' or document the exact error margin, since compliance logs rely on accurate change timestamps.",
+          "id": "P4-07",
+          "persona": "P4"
+        },
+        {
+          "title": "Date fields ambiguous between transaction, settlement, and accounting dates",
+          "location": "components.schemas.Transaction.properties.accounting_date, settlement_date, user_transaction_time; GET /developer/v1/transactions from_date/to_date",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "from_date: 'with a user_transaction_time after the given date'. accounting_date: 'Based on the cleared date, transaction date, or a manually overridden date, depending on your accounting preferences in Ramp.'",
+          "suggested_fix": "Specify which date each date filter uses and state whether the 'after' and 'before' boundaries are inclusive, and which date governs period-end reporting.",
+          "id": "P4-08",
+          "persona": "P4"
+        },
+        {
+          "title": "Reimbursement date filters are inconsistent in meaning",
+          "location": "GET /developer/v1/reimbursements query parameters to_transaction_date and to_date",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "to_transaction_date: 'Data.' Filter from_transaction_date: 'after this date'. from_date: 'created after this date'. The description for to_transaction_date is just 'Data.'",
+          "suggested_fix": "Replace 'Data.' with a real description and define each date filter by the exact field it compares.",
+          "id": "P4-09",
+          "persona": "P4"
+        },
+        {
+          "title": "Trace ID and payment fields lack explanation for reconciliation",
+          "location": "components.schemas.ApiReimbursementTraceId and Reimbursement.properties.payment_id",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "'trace_id': 'The bank-facing accountability reference for this reimbursement payment, when available.' 'payment_id': 'The unique identifier of the payment batch...' with no explanation of when trace_id is absent or how payment_id relates to payment_batch_id.",
+          "suggested_fix": "State when trace_id is null, and explain the relationship between payment_id and payment_batch_id.",
+          "id": "P4-10",
+          "persona": "P4"
+        },
+        {
+          "title": "Funding source values not defined for compliance",
+          "location": "components.schemas.Reimbursement.properties.funding_source",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "'RAMP_FUNDED does not confirm settlement.' and 'NOT_RAMP_FUNDED': 'No Ramp-funding evidence was found for the payment request.' Null is described only as 'could not be determined'.",
+          "suggested_fix": "Explain what a reviewer should do with null and NOT_RAMP_FUNDED, and whether settlement is confirmed by another field.",
+          "id": "P4-11",
+          "persona": "P4"
+        },
+        {
+          "title": "Physical card 'state' and 'is_suspended' may conflict",
+          "location": "components.schemas.PhysicalCard.properties.state and is_suspended",
+          "category": "consistency",
+          "severity": 2,
+          "evidence": "state enum includes 'SUSPENDED' while a separate 'is_suspended' boolean exists; the suspension endpoints say 'The suspension is revertable.' with no statement of what state is returned after suspend.",
+          "suggested_fix": "Document the relationship between state and is_suspended and state the value returned after suspend and unsuspend.",
+          "id": "P4-12",
+          "persona": "P4"
+        },
+        {
+          "title": "Card vault 'limit' and 'PCILimit' response missing change audit",
+          "location": "POST /developer/v1/cards/vault response PCILimit",
+          "category": "other",
+          "severity": 2,
+          "evidence": "Response includes 'created_at' and 'restrictions' but no field showing who created the limit or who last changed it; 'allowed_overage_percent_override' is described only as 'Fund-level override'.",
+          "suggested_fix": "Add created_by and updated_by fields and explain what 'allowed overage percent' means in dollar terms.",
+          "id": "P4-13",
+          "persona": "P4"
+        },
+        {
+          "title": "Mileage reimbursement 'distance' units unclear in response",
+          "location": "components.schemas.Reimbursement.properties.distance",
+          "category": "documentation",
+          "severity": 1,
+          "evidence": "'The distance of the reimbursement in miles, for mileage reimbursements.' while the create request accepts distance_units 'KILOMETERS' or 'MILES' and the response has no distance_units field.",
+          "suggested_fix": "Add a distance_units field to the response, or state that distance is always miles regardless of the request.",
+          "id": "P4-14",
+          "persona": "P4"
+        }
+      ]
+    },
+    {
+      "persona": "P5",
+      "name": "Kenji A.",
+      "usage": {
+        "input_tokens": 733,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 70748,
+        "output_tokens": 2483
+      },
+      "stop_reason": "tool_use",
+      "seconds": 11.5,
+      "dropped": 0,
+      "findings": [
+        {
+          "title": "Auth scopes missing on POST /reimbursements/mileage",
+          "location": "POST /developer/v1/reimbursements/mileage",
+          "category": "security",
+          "severity": 3,
+          "evidence": "\"security\":[] with a 401 response; no oauth2 scope is declared for a write operation.",
+          "suggested_fix": "Declare the required scope (e.g. reimbursements:write) in security, as every other write operation does.",
+          "id": "P5-01",
+          "persona": "P5"
+        },
+        {
+          "title": "Operation summary contradicts its behavior: GET virtual card",
+          "location": "GET /developer/v1/cards/virtual/{card_id}",
+          "category": "naming",
+          "severity": 3,
+          "evidence": "\"summary\":\"Permanently delete this resource\" on a GET operation that returns a VirtualCard.",
+          "suggested_fix": "Change the summary to 'Fetch a virtual card'; the delete wording is wrong and would mislead tool selection.",
+          "id": "P5-02",
+          "persona": "P5"
+        },
+        {
+          "title": "Terminate and suspend operations have confusing overlapping descriptions",
+          "location": "DELETE /developer/v1/cards/physical/{card_id} and POST/DELETE /developer/v1/cards/physical/{card_id}/suspension",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "DELETE is 'Terminate a card' with description 'irreversible'; POST suspension says 'The suspension is revertable.' but the DELETE on /suspension is 'Unsuspend a card' with no description; no state transition is documented beyond PhysicalCard.state enum.",
+          "suggested_fix": "Add explicit descriptions stating which card states each operation accepts and the resulting state, so an agent can choose correctly.",
+          "id": "P5-03",
+          "persona": "P5"
+        },
+        {
+          "title": "Create physical card response code and schema mismatch with GET",
+          "location": "GET /developer/v1/cards/physical/{card_id}",
+          "category": "consistency",
+          "severity": 2,
+          "evidence": "Success is documented as \"201\" for a GET, while the POST create returns \"200\" and the other GETs return 200.",
+          "suggested_fix": "Document GET success as 200 and keep create as 201 consistently.",
+          "id": "P5-04",
+          "persona": "P5"
+        },
+        {
+          "title": "Two list endpoints for physical cards mismatch on operationId and filters",
+          "location": "POST /developer/v1/cards/physical",
+          "category": "naming",
+          "severity": 2,
+          "evidence": "operationId \"post_physical_card_list_with_pagination\" on a create operation, and the GET list uses \"get_physical_card_list_with_pagination\" with no pagination parameters at all.",
+          "suggested_fix": "Rename operationIds to match their actions (create_physical_card) and add page/start/page_size parameters to the GET list.",
+          "id": "P5-05",
+          "persona": "P5"
+        },
+        {
+          "title": "Inconsistent pagination parameters across list endpoints",
+          "location": "GET /developer/v1/cards/physical, GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions",
+          "category": "pagination",
+          "severity": 2,
+          "evidence": "Physical card list has no start/page_size; virtual cards use 'start' and 'page_size' (min 2, default 20); transactions adds include_count; cards/virtual uses 'userId' while others use 'user_id'.",
+          "suggested_fix": "Apply one pagination scheme to every list endpoint and use consistent snake_case filter names like user_id.",
+          "id": "P5-06",
+          "persona": "P5"
+        },
+        {
+          "title": "Physical card list parameter documented as default true but not in schema",
+          "location": "GET /developer/v1/cards/physical",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "include_activated_only: \"Defaults to True if not specified\" but the schema has no default field; the description and the 'x-beta' flag leave the behavior unclear.",
+          "suggested_fix": "Add 'default: true' to the schema and document combined behavior when include_terminated_only is also true.",
+          "id": "P5-07",
+          "persona": "P5"
+        },
+        {
+          "title": "Transaction split endpoint lacks success-response linkage details",
+          "location": "PATCH /developer/v1/transactions/{transaction_id}",
+          "category": "other",
+          "severity": 2,
+          "evidence": "Description says 'Send an empty line_items array to unsplit' but the request requires amounts summing to the transaction amount; no error response (400) is declared for a sum mismatch, unlike GET operations.",
+          "suggested_fix": "Declare a 400 response with DeveloperApiErrorResponse for invalid or non-summing line items.",
+          "id": "P5-08",
+          "persona": "P5"
+        },
+        {
+          "title": "Receipt upload 'idempotency_key' is duplicated and not in header",
+          "location": "POST /developer/v1/reimbursement/submit-receipt",
+          "category": "idempotency",
+          "severity": 2,
+          "evidence": "Body field idempotency_key is required; the vault endpoint instead takes an X-Idempotency-Key header with a 255-char limit; the receipt endpoint's path is also 'reimbursement' (singular) while others use 'reimbursements'.",
+          "suggested_fix": "Use the same X-Idempotency-Key header convention across create endpoints and align the path to /reimbursements/submit-receipt.",
+          "id": "P5-09",
+          "persona": "P5"
+        },
+        {
+          "title": "Mileage create endpoint has no way to fail on bad input",
+          "location": "POST /developer/v1/reimbursements/mileage",
+          "category": "errors",
+          "severity": 2,
+          "evidence": "Only a 200 and a 401 are documented; no 400 with DeveloperApiErrorResponse, though the other write endpoints document 400.",
+          "suggested_fix": "Add a 400 response returning DeveloperApiErrorResponse so agents can recover from invalid input.",
+          "id": "P5-10",
+          "persona": "P5"
+        },
+        {
+          "title": "Post-create card vault response uses PCILimit, unrelated to path",
+          "location": "POST /developer/v1/cards/vault",
+          "category": "schema-design",
+          "severity": 2,
+          "evidence": "Path is card vault creation but the 201 returns \"PCILimit\" with the card and restrictions nested; the summary says 'Create a spend limit and retrieve sensitive card details' while the required scope is cards:read_vault plus limits:write.",
+          "suggested_fix": "Rename the operation to reflect it creates a limit and card, and document both scopes as required together.",
+          "id": "P5-11",
+          "persona": "P5"
+        },
+        {
+          "title": "Parameter spend_allocation_id versus fund_id naming drift",
+          "location": "POST /developer/v1/reimbursements/mileage and GET /developer/v1/reimbursements",
+          "category": "naming",
+          "severity": 2,
+          "evidence": "Mileage body uses 'spend_allocation_id' (described as a fund id), while the response and spec use 'fund_id' and the deprecated 'spend_limit_id'; the card vault body uses 'spend_program_id' with 'limit' terminology.",
+          "suggested_fix": "Use one identifier name for the fund concept across request and response bodies, and mark deprecated aliases consistently.",
+          "id": "P5-12",
+          "persona": "P5"
+        },
+        {
+          "title": "Transaction 'amount' documented as deprecated but still required path",
+          "location": "SingleTransaction and Transaction schemas, property 'amount'",
+          "category": "schema-design",
+          "severity": 1,
+          "evidence": "'amount' is type number in Transaction but type string in SingleTransaction, with 'Deprecated. Use entity_amount.'",
+          "suggested_fix": "Make the type of amount identical in both schemas, or remove it in favor of entity_amount.",
+          "id": "P5-13",
+          "persona": "P5"
+        },
+        {
+          "title": "Two transaction tags with overlapping names",
+          "location": "tags: 'Transaction' and 'transactions' on PATCH /developer/v1/transactions/{transaction_id}",
+          "category": "naming",
+          "severity": 1,
+          "evidence": "tags: [\"Transaction\",\"transactions\"] and a separate tag entry named \"transactions\" with no description.",
+          "suggested_fix": "Remove the duplicate 'transactions' tag and keep one tag per resource.",
+          "id": "P5-14",
+          "persona": "P5"
+        }
+      ]
+    },
+    {
+      "persona": "P6",
+      "name": "Ingrid V.",
+      "usage": {
+        "input_tokens": 743,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 70748,
+        "output_tokens": 3190
+      },
+      "stop_reason": "tool_use",
+      "seconds": 14.3,
+      "dropped": 0,
+      "findings": [
+        {
+          "title": "No rate limit, retry, or backoff guidance anywhere in spec",
+          "location": "info / components.securitySchemes",
+          "category": "documentation",
+          "severity": 3,
+          "evidence": "No operation or the info block documents rate limits, 429 responses, Retry-After headers, or what clients should do after a failed or timed-out request.",
+          "suggested_fix": "Document per-key rate limits, 429 response shape with Retry-After, and recommended retry/backoff behavior for 5xx and network errors.",
+          "id": "P6-01",
+          "persona": "P6"
+        },
+        {
+          "title": "Most write operations lack idempotency keys",
+          "location": "POST /developer/v1/cards/physical, POST /developer/v1/reimbursements/mileage, POST /developer/v1/cards/vault",
+          "category": "idempotency",
+          "severity": 3,
+          "evidence": "Only POST /developer/v1/cards/vault defines X-Idempotency-Key (optional); POST /developer/v1/cards/physical and POST /developer/v1/reimbursements/mileage have no idempotency mechanism, yet create resources and have no 409/429 responses documented.",
+          "suggested_fix": "Add an idempotency mechanism (header or body key, with documented retention window and replay behavior) to every POST that creates resources, and make it required or clearly documented as optional.",
+          "id": "P6-02",
+          "persona": "P6"
+        },
+        {
+          "title": "Idempotency key defined inconsistently across two endpoints",
+          "location": "POST /developer/v1/reimbursement/submit-receipt; components.schemas.ApiReimbursementUploadReceiptRequestRequestBody.properties.idempotency_key",
+          "category": "idempotency",
+          "severity": 2,
+          "evidence": "Receipt upload takes a required body field 'idempotency_key' with no length or format limits, while cards/vault uses header 'X-Idempotency-Key' (optional, max 255 chars, min 1).",
+          "suggested_fix": "Use one mechanism (header X-Idempotency-Key) with the same constraints and documented scope/expiry across all endpoints.",
+          "id": "P6-03",
+          "persona": "P6"
+        },
+        {
+          "title": "Pagination is inconsistent across list endpoints",
+          "location": "GET /developer/v1/cards/physical; GET /developer/v1/cards/virtual; GET /developer/v1/reimbursements; GET /developer/v1/transactions",
+          "category": "pagination",
+          "severity": 3,
+          "evidence": "Physical cards list has no start or page_size parameter and returns DeveloperAPINestedPage with no bound; virtual cards and reimbursements/transactions accept 'start' and 'page_size' (default 20, 'between 2 and 100'); transactions alone return DeveloperAPICountedPage with total_count.",
+          "suggested_fix": "Apply one pagination scheme (cursor params, default and maximum page size, next-page semantics) to every list endpoint, including physical cards.",
+          "id": "P6-04",
+          "persona": "P6"
+        },
+        {
+          "title": "Physical card list is unpaginated and unbounded",
+          "location": "GET /developer/v1/cards/physical",
+          "category": "pagination",
+          "severity": 3,
+          "evidence": "The operation's parameters are only user_id, display_name, include_activated_only, include_terminated_only, yet the response is a PaginatedResponseApiPhysicalCardResource with a 'page.next' link.",
+          "suggested_fix": "Add start and page_size parameters with documented defaults and maximum, matching the other list endpoints.",
+          "id": "P6-05",
+          "persona": "P6"
+        },
+        {
+          "title": "page_size bounds and default are only described in prose",
+          "location": "GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions (page_size)",
+          "category": "pagination",
+          "severity": 2,
+          "evidence": "Description says 'must be between 2 and 100' but schema is only {default:20, type:integer} with no minimum or maximum; behavior when value is out of range (error or clamp) is unstated.",
+          "suggested_fix": "Express bounds as schema minimum: 2 and maximum: 100, and document the error or clamping behavior for out-of-range values.",
+          "id": "P6-06",
+          "persona": "P6"
+        },
+        {
+          "title": "Pagination cursor 'start' is an opaque ID but described as entity ID",
+          "location": "GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions (start)",
+          "category": "pagination",
+          "severity": 2,
+          "evidence": "'start' is described as \"The ID of the last entity of the previous page\", yet the 'next' link is a full URL and clients are not told whether to use the link or build the param; no stability or end-of-list guidance is given.",
+          "suggested_fix": "Describe start as an opaque cursor, state that clients should follow page.next, and document end-of-results behavior and cursor stability.",
+          "id": "P6-07",
+          "persona": "P6"
+        },
+        {
+          "title": "Pagination nested-page vs counted-page schemas diverge",
+          "location": "components.schemas.DeveloperAPINestedPage vs components.schemas.DeveloperAPICountedPage",
+          "category": "consistency",
+          "severity": 2,
+          "evidence": "Nested page has only 'next'; counted page requires 'next', 'total_count', 'total_count_capped', and include_count defaults to false, returning null total_count when omitted.",
+          "suggested_fix": "Unify the page object so total_count fields are always present (null when not requested) across all list responses.",
+          "id": "P6-08",
+          "persona": "P6"
+        },
+        {
+          "title": "Inconsistent query parameter naming style",
+          "location": "GET /developer/v1/cards/virtual (userId); GET /developer/v1/transactions (orderByAmountAsc, order_by_amount_desc)",
+          "category": "naming",
+          "severity": 2,
+          "evidence": "Parameter 'userId' is camelCase while every other parameter is snake_case (e.g. user_id); transactions has 'orderByAmountAsc' alongside 'order_by_amount_desc'.",
+          "suggested_fix": "Rename to snake_case (user_id, order_by_amount_asc) and deprecate the old names with a documented transition period.",
+          "id": "P6-09",
+          "persona": "P6"
+        },
+        {
+          "title": "Overlapping and deprecated filter parameters on reimbursements",
+          "location": "GET /developer/v1/reimbursements (sync_ready, has_no_sync_commits, sync_status); GET /developer/v1/reimbursements (user_id, awaiting_approval_by_user_id)",
+          "category": "consistency",
+          "severity": 2,
+          "evidence": "sync_status 'Supersedes has_no_sync_commits and sync_ready', yet all three remain; the 'user_id' parameter has no description while similar 'Filter by card owner' parameters do; the same overlap exists in transactions.",
+          "suggested_fix": "Mark sync_ready and has_no_sync_commits as deprecated with a removal plan and document precedence when combined.",
+          "id": "P6-10",
+          "persona": "P6"
+        },
+        {
+          "title": "Unclear or placeholder parameter descriptions",
+          "location": "GET /developer/v1/reimbursements (to_transaction_date); GET /developer/v1/transactions (min_amount, max_amount, sk_category_id)",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "to_transaction_date is described only as \"Data.\"; from_transaction_date says 'after this date' while to_date/from_date on transactions say 'before'/'after' with no inclusivity or timezone; min_amount has no unit statement beyond 'U.S. Dollar denominated' and the same 'larger amount that the given amount' wording is ambiguous.",
+          "suggested_fix": "Replace 'Data.' with a real description, state inclusive/exclusive bounds and timezone, and clarify min/max amount semantics and units.",
+          "id": "P6-11",
+          "persona": "P6"
+        },
+        {
+          "title": "Same operation has conflicting HTTP method semantics and summaries",
+          "location": "/developer/v1/cards/virtual/{card_id} GET; /developer/v1/cards/physical/{card_id}/suspension DELETE and POST",
+          "category": "documentation",
+          "severity": 3,
+          "evidence": "GET /cards/virtual/{card_id} is summarized \"Permanently delete this resource\" while it only fetches; the physical suspension DELETE is 'Unsuspend a card' and POST is 'Suspend a card' with no error responses for DELETE.",
+          "suggested_fix": "Correct the summary to 'Fetch a virtual card' and ensure every operation's summary matches its method.",
+          "id": "P6-12",
+          "persona": "P6"
+        },
+        {
+          "title": "Inconsistent success status codes and undocumented error responses",
+          "location": "GET /developer/v1/cards/physical/{card_id} (201); POST /developer/v1/cards/physical (200 with string 400); PATCH /developer/v1/cards/physical/{card_id}",
+          "category": "errors",
+          "severity": 3,
+          "evidence": "Fetch returns 201; create returns 200 and its 400 body is schema type 'string' instead of DeveloperApiErrorResponse; PATCH, GET virtual, and several others define no 400/401 errors despite auth and validation.",
+          "suggested_fix": "Use 200 for reads, 201 for creates, and a single DeveloperApiErrorResponse schema for every 4xx; document 401/403/404/429 uniformly.",
+          "id": "P6-13",
+          "persona": "P6"
+        },
+        {
+          "title": "Reimbursement 'state' enum conflicts with 'funding_source' and vague wording",
+          "location": "components.schemas.Reimbursement.properties.state; components.schemas.Reimbursement.properties.funding_source",
+          "category": "documentation",
+          "severity": 2,
+          "evidence": "state enum includes EXPORTED, EXPORT_SUCCESSFUL, REIMBURSED, REIMBURSED_VIA_PUSH and PUSH_PAYMENT_INITIATED, labeled 'Paid' vs 'Payment successful' vs 'Paid' for different values; funding_source says \"RAMP_FUNDED does not confirm settlement\" which is unclear to non-experts.",
+          "suggested_fix": "Define each state with a unique, non-overlapping label and state a clear client-facing meaning and terminal-vs-transient classification.",
+          "id": "P6-14",
+          "persona": "P6"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "title": "GET physical card by ID returns 201 instead of 200",
+      "location": "GET /developer/v1/cards/physical/{card_id}",
+      "category": "consistency",
+      "severity": 3,
+      "evidence": "responses: \"201\": {\"description\":\"Success\", schema PhysicalCard}; there is no 200 response, while sibling GET endpoints return 200.",
+      "suggested_fix": "Change the success response code to 200 so generated clients handle the success path.",
+      "id": "P1-01",
+      "persona": "P1"
+    },
+    {
+      "title": "Physical card POST and PATCH lack documented error responses",
+      "location": "POST /developer/v1/cards/physical and PATCH /developer/v1/cards/physical/{card_id}",
+      "category": "errors",
+      "severity": 2,
+      "evidence": "POST responses only list 200 and 400 with a plain string schema, \"schema\":{\"type\":\"string\"}; PATCH lists only 200. Neither documents 401, 404, or the DeveloperApiErrorResponse shape used elsewhere.",
+      "suggested_fix": "Use DeveloperApiErrorResponse for every 4xx and document 401 and 404 on these operations.",
+      "id": "P1-02",
+      "persona": "P1"
+    },
+    {
+      "title": "Physical card POST 400 body is untyped string",
+      "location": "POST /developer/v1/cards/physical, response 400",
+      "category": "errors",
+      "severity": 2,
+      "evidence": "\"400\": {\"description\":\"Error\",\"content\":{\"application/json\":{\"schema\":{\"type\":\"string\"}}}}, while other 400 responses use DeveloperApiErrorResponse with error_v2.",
+      "suggested_fix": "Replace the string schema with $ref DeveloperApiErrorResponse and a description of the failure cases.",
+      "id": "P1-03",
+      "persona": "P1"
+    },
+    {
+      "title": "Many operations have no error responses at all",
+      "location": "PATCH /developer/v1/cards/physical/{card_id}, POST /developer/v1/cards/physical/{card_id}/suspension (partly), DELETE /developer/v1/cards/physical/{card_id}/suspension, GET /developer/v1/cards/virtual/{card_id}, GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/reimbursements/{reimbursement_id}, POST /developer/v1/cards/vault",
+      "category": "errors",
+      "severity": 2,
+      "evidence": "These operations define only success responses (e.g., GET /developer/v1/cards/virtual/{card_id} has only \"200\"; GET /developer/v1/reimbursements has only \"200\"). Failures like 404 or 401 are undocumented.",
+      "suggested_fix": "Add 401, 403, 404 (where a resource is fetched by ID) and 400 responses referencing DeveloperApiErrorResponse to every operation.",
+      "id": "P1-04",
+      "persona": "P1"
+    },
+    {
+      "title": "Virtual card GET by ID has wrong summary",
+      "location": "GET /developer/v1/cards/virtual/{card_id}",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "\"summary\":\"Permanently delete this resource\" on a GET operation whose description is \"Get single virtual card\".",
+      "suggested_fix": "Change the summary to something like \"Fetch a virtual card\"; the text currently describes deletion.",
+      "id": "P1-05",
+      "persona": "P1"
+    },
+    {
+      "title": "Inconsistent query parameter casing for user filter",
+      "location": "GET /developer/v1/cards/virtual (userId) vs GET /developer/v1/cards/physical (user_id) and GET /developer/v1/reimbursements (user_id)",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "Virtual cards list uses \"name\":\"userId\"; the other list endpoints use \"user_id\". Transactions also has orderByAmountAsc alongside order_by_amount_desc.",
+      "suggested_fix": "Rename userId to user_id; also rename orderByAmountAsc to order_by_amount_asc, keeping a deprecated alias if needed.",
+      "id": "P1-06",
+      "persona": "P1"
+    },
+    {
+      "title": "Virtual card list lacks include_count and paging pattern differences",
+      "location": "GET /developer/v1/cards/virtual and GET /developer/v1/cards/physical",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "Virtual list uses start/page_size with page_size default 20 and no min/max in schema; physical list has no start or page_size parameters at all, yet returns PaginatedResponseApiPhysicalCardResource with a next link.",
+      "suggested_fix": "Document start and page_size on the physical card list and state the same 2 to 100 bounds on both endpoints.",
+      "id": "P1-07",
+      "persona": "P1"
+    },
+    {
+      "title": "Transaction state filter and default behavior conflict with sibling",
+      "location": "GET /developer/v1/transactions, parameter state",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "Description says \"If state is not set, all transactions except declined transactions will be returned,\" but the state enum includes \"ALL\" and the parameter description says \"If set to 'ALL', all transactions including 'DECLINED' will be listed.\" The default for state is not stated in the schema.",
+      "suggested_fix": "Add an explicit default value to the schema and state in one place how declined transactions are included.",
+      "id": "P1-08",
+      "persona": "P1"
+    },
+    {
+      "title": "Reimbursement list defaults and enum docs differ from transaction list",
+      "location": "GET /developer/v1/reimbursements, parameter direction",
+      "category": "consistency",
+      "severity": 1,
+      "evidence": "direction has \"default\":\"BUSINESS_TO_USER\" but the description says \"(BUSINESS_TO_USER default ...)\"; the transactions list has no equivalent default. Also state enum lists values with no explanation in the description.",
+      "suggested_fix": "Keep defaults in the schema only and use consistent description wording across list endpoints.",
+      "id": "P1-09",
+      "persona": "P1"
+    },
+    {
+      "title": "Overlapping sync filters on reimbursements with unclear precedence",
+      "location": "GET /developer/v1/reimbursements, parameters sync_status, sync_ready, has_no_sync_commits",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "sync_status: \"Supersedes has_no_sync_commits and sync_ready.\" but sync_ready and has_no_sync_commits remain as separate boolean params with no deprecation marker.",
+      "suggested_fix": "Mark sync_ready and has_no_sync_commits as deprecated in the spec, or document the combined behavior.",
+      "id": "P1-10",
+      "persona": "P1"
+    },
+    {
+      "title": "Reimbursement direction in the list endpoint has no required-ness",
+      "location": "GET /developer/v1/reimbursements, parameter user_id",
+      "category": "documentation",
+      "severity": 1,
+      "evidence": "The user_id query parameter has no description, unlike all other parameters on the same operation.",
+      "suggested_fix": "Add a description stating what user_id filters (reimbursee or submitter).",
+      "id": "P1-11",
+      "persona": "P1"
+    },
+    {
+      "title": "Transaction amount fields have inconsistent types and deprecations",
+      "location": "Transaction.amount and SingleTransaction.amount",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Transaction.amount is \"type\":\"number\" while SingleTransaction.amount is \"type\":\"string\", both marked deprecated: \"Deprecated. Use entity_amount.\"",
+      "suggested_fix": "Make both the same type and mark it deprecated consistently; a generated client currently gets a number from one endpoint and a string from the other.",
+      "id": "P1-12",
+      "persona": "P1"
+    },
+    {
+      "title": "Required fields that are nullable or often absent",
+      "location": "Transaction and SingleTransaction required list; PhysicalCard required list",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "PhysicalCard requires \"display_name\",\"expiration\",\"fulfillment\" but its properties say display_name and expiration are readOnly and fulfillment is nullable: true. Transaction requires \"entity_amount\" and \"entity_id\", both nullable: true in its properties.",
+      "suggested_fix": "Make required fields match nullability, either non-nullable or removed from required, so typed clients don't fail on null.",
+      "id": "P1-13",
+      "persona": "P1"
+    },
+    {
+      "title": "Mileage reimbursement POST has empty security and no 400 response",
+      "location": "POST /developer/v1/reimbursements/mileage",
+      "category": "security",
+      "severity": 3,
+      "evidence": "\"security\":[] overrides the global oauth2 requirement, and responses define only 200 and 401 with no 400 or scope listed.",
+      "suggested_fix": "Confirm whether this endpoint should be unauthenticated; if not, set the reimbursements:write scope and document 400 errors.",
+      "id": "P1-14",
+      "persona": "P1"
+    },
+    {
+      "title": "Card vault PAN/CVV returned with no declared protection",
+      "location": "components.schemas.CardDetails.properties.pan / cvv; GET /developer/v1/cards/vault/{card_id}",
+      "category": "security",
+      "severity": 3,
+      "evidence": "CardDetails has pan (\"Primary account number(PAN) of the card.\") and cvv with no security or sensitivity marking; GET /developer/v1/cards/vault/{card_id} is secured only by oauth2 [\"cards:read_vault\"] and documents no additional controls. PhysicalCard.shipping.full_card_number is also a plain string.",
+      "suggested_fix": "Mark pan/cvv/full_card_number as sensitive (x-sensitive or description), require a stronger scope or step-up, and document response caching restrictions.",
+      "id": "P2-01",
+      "persona": "P2"
+    },
+    {
+      "title": "Mutating operations lack security requirement",
+      "location": "POST /developer/v1/reimbursements/mileage",
+      "category": "security",
+      "severity": 3,
+      "evidence": "\"security\":[] on the operation, and it creates a reimbursement payable to reimbursee_id with no oauth2 scope.",
+      "suggested_fix": "Declare oauth2 with reimbursements:write like other reimbursement write operations, or document why it is public.",
+      "id": "P2-02",
+      "persona": "P2"
+    },
+    {
+      "title": "Financial write endpoints not idempotent by default",
+      "location": "POST /developer/v1/cards/vault; POST /developer/v1/cards/physical; POST /developer/v1/reimbursements/mileage",
+      "category": "idempotency",
+      "severity": 2,
+      "evidence": "Only POST /cards/vault declares optional X-Idempotency-Key header. POST /reimbursements/mileage and POST /cards/physical have no key; the receipt upload uses a body idempotency_key, a different mechanism.",
+      "suggested_fix": "Use one idempotency mechanism (header) consistently across all POST endpoints and mark it required for money-moving or card-issuing calls.",
+      "id": "P2-03",
+      "persona": "P2"
+    },
+    {
+      "title": "Idempotency key location inconsistent between endpoints",
+      "location": "POST /developer/v1/reimbursement/submit-receipt, requestBody idempotency_key",
+      "category": "consistency",
+      "severity": 2,
+      "evidence": "ApiReimbursementUploadReceiptRequestRequestBody has required \"idempotency_key\" in the multipart body, while POST /developer/v1/cards/vault uses header X-Idempotency_key (optional, maxLength 255, minLength 1). The receipt key has no length limit.",
+      "suggested_fix": "Move the key to an X-Idempotency-Key header with the same maxLength/minLength constraints and make it consistent across endpoints.",
+      "id": "P2-04",
+      "persona": "P2"
+    },
+    {
+      "title": "Inconsistent resource path naming: reimbursement vs reimbursements",
+      "location": "POST /developer/v1/reimbursement/submit-receipt",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "Path uses singular \"reimbursement\" while all other reimbursement paths use \"/developer/v1/reimbursements\" and \"/developer/v1/reimbursements/{reimbursement_id}\"; \"submit-receipt\" is a kebab-case verb segment unlike other paths.",
+      "suggested_fix": "Rename to /developer/v1/reimbursements/receipts or similar plural noun path.",
+      "id": "P2-05",
+      "persona": "P2"
+    },
+    {
+      "title": "User identifier parameter named inconsistently",
+      "location": "GET /developer/v1/cards/virtual (userId); GET /developer/v1/reimbursements (user_id); GET /developer/v1/cards/physical (user_id)",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "Virtual cards list uses query \"userId\" (camelCase), while physical cards, reimbursements, and transactions use \"user_id\".",
+      "suggested_fix": "Rename userId to user_id in GET /cards/virtual.",
+      "id": "P2-06",
+      "persona": "P2"
+    },
+    {
+      "title": "Sort parameters use inconsistent naming conventions",
+      "location": "GET /developer/v1/transactions, query orderByAmountAsc vs order_by_amount_desc",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "\"orderByAmountAsc\" is camelCase while \"order_by_date_asc\", \"order_by_date_desc\", and \"order_by_amount_desc\" are snake_case. Two ascending/descending parameters are separate booleans, so both may be sent.",
+      "suggested_fix": "Use one snake_case scheme such as order_by_amount_asc, and use a single enum parameter (e.g. sort=date_desc) instead of mutually exclusive booleans.",
+      "id": "P2-07",
+      "persona": "P2"
+    },
+    {
+      "title": "Pagination parameters and page shapes differ across list endpoints",
+      "location": "GET /developer/v1/cards/virtual; GET /developer/v1/transactions",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "Virtual cards and reimbursements take start/page_size, but virtual card page_size has no min/max constraint in schema (spec text says 2-100 only in description); PaginatedResponseApiVirtualCardResource page has only next, while transactions page includes total_count and total_count_capped. Physical cards list has no page_size or start parameters at all.",
+      "suggested_fix": "Apply the same start/page_size schema (minimum 2, maximum 100) to every list endpoint and document the same page object shape.",
+      "id": "P2-08",
+      "persona": "P2"
+    },
+    {
+      "title": "Transaction state filter enum mixes filter and resource semantics",
+      "location": "GET /developer/v1/transactions, parameter state; components.schemas.Transaction.properties.state",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Query state enum includes \"ALL\", which is not a transaction state but a filter value, yet Transaction.state enum also includes \"ALL\" as a returned value. Response state can never legitimately be ALL.",
+      "suggested_fix": "Separate the filter enum from the resource enum; remove ALL from the Transaction.state schema.",
+      "id": "P2-09",
+      "persona": "P2"
+    },
+    {
+      "title": "Date-time filter parameters lack timezone and inconsistent semantics",
+      "location": "GET /developer/v1/reimbursements, to_transaction_date / from_date / updated_after",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "to_transaction_date has description \"Data.\" (no meaning). from_transaction_date says \"after this date\" while from_date is \"created after\" and transaction endpoints say \"user_transaction_time after\"; description for from_date/to_date formats do not state inclusivity or timezone.",
+      "suggested_fix": "Replace placeholder descriptions and define inclusive/exclusive bounds and timezone (ISO8601 with offset) for every date filter.",
+      "id": "P2-10",
+      "persona": "P2"
+    },
+    {
+      "title": "Placeholder descriptions on parameters",
+      "location": "GET /developer/v1/reimbursements, to_transaction_date; GET /developer/v1/transactions/{transaction_id}, include_merchant_data",
+      "category": "documentation",
+      "severity": 1,
+      "evidence": "to_transaction_date description: \"Data.\"; include_merchant_data (path transactions/{transaction_id}) description: \"Data.\"",
+      "suggested_fix": "Describe what each parameter filters or includes.",
+      "id": "P2-11",
+      "persona": "P2"
+    },
+    {
+      "title": "Monetary amounts are unbounded numbers and floats",
+      "location": "components.schemas.Transaction.properties.amount; ApiCardVaultCreationRequestBody; CurrencyAmountRequestBody.amount; ApiAccountingSplitLineItemRequestBody.amount",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Transaction.amount is \"type\":\"number\" (float) and is deprecated; CurrencyAmountRequestBody.amount and ApiAccountingSplitLineItemRequestBody.amount are integer with no minimum; ApiAccountingSplitLineItemRequestBody.amount says \"Amount in minor units\" but accepts negative values, and the spend limit limit has no minimum.",
+      "suggested_fix": "Use integer minor units everywhere, add minimum:0 where negative values are invalid, and state the constraint on spending limit amounts.",
+      "id": "P2-12",
+      "persona": "P2"
+    },
+    {
+      "title": "Free-text and reference strings lack length limits",
+      "location": "components.schemas.ApiMileageReimbursementCreateRequestBody.properties.memo; ApiCardVaultCreationRequestBody.display_name; ApiPhysicalCardUpdateResourceRequestBody.display_name; ApiTransactionsUpdateRequestBody line item memo",
+      "category": "schema-design",
+      "severity": 1,
+      "evidence": "memo, display_name, and line-item memo are \"type\":\"string\" with no maxLength; ApiReimbursementUploadReceiptRequest idempotency_key also has no maxLength, unlike the header in POST /cards/vault (maxLength 255).",
+      "suggested_fix": "Add maxLength to all free-text string fields and align the idempotency key limits.",
+      "id": "P2-13",
+      "persona": "P2"
+    },
+    {
+      "title": "Card identifiers typed as unformatted string while others are uuid",
+      "location": "GET /developer/v1/cards/physical/{card_id}; PATCH /developer/v1/cards/vault/{card_id}; GET /developer/v1/cards/vault/{card_id}; DELETE/GET/PATCH card paths",
+      "category": "consistency",
+      "severity": 1,
+      "evidence": "Path parameter card_id is {\"type\":\"string\"} with no format, while the same card id is format uuid in query params (e.g. transaction card_id, PhysicalCard.id, PCICardDetails.id). Reimbursement_id and transaction_id path parameters are also untyped strings.",
+      "suggested_fix": "Declare path IDs with format uuid (or document the actual format) consistently.",
+      "id": "P2-14",
+      "persona": "P2"
+    },
+    {
+      "title": "Physical card deletion and suspension lack consistent verbs",
+      "location": "DELETE /developer/v1/cards/physical/{card_id}; GET /developer/v1/cards/virtual/{card_id}",
+      "category": "naming",
+      "severity": 1,
+      "evidence": "DELETE /cards/physical/{card_id} is summarized \"Terminate a card\"; GET /cards/virtual/{card_id} is summarized \"Permanently delete this resource\" while returning 200 with a VirtualCard. Suspension uses POST and DELETE on a \"/suspension\" sub-resource.",
+      "suggested_fix": "Correct the GET summary to \"Fetch a virtual card\" and align terminology (terminate vs delete) across card endpoints.",
+      "id": "P2-15",
+      "persona": "P2"
+    },
+    {
+      "title": "Error responses undocumented or inconsistently typed",
+      "location": "POST /developer/v1/cards/physical; PATCH /developer/v1/cards/physical/{card_id}; GET /developer/v1/cards/virtual/{card_id}",
+      "category": "errors",
+      "severity": 2,
+      "evidence": "POST /cards/physical 400 response schema is type string while other 400s use DeveloperApiErrorResponse; PATCH /cards/physical/{card_id} and GET /cards/virtual/{card_id} document no 400/401/404 responses; the POST /cards/vault 201 vs GET /cards/physical/{card_id} 201 status code is inconsistent with other 200s.",
+      "suggested_fix": "Use DeveloperApiErrorResponse for all error responses and document consistent success codes.",
+      "id": "P2-16",
+      "persona": "P2"
+    },
+    {
+      "title": "Transaction amount fields have no unit or currency guarantee",
+      "location": "components.schemas.Transaction.properties.amount",
+      "category": "schema-design",
+      "severity": 3,
+      "evidence": "\"amount\":{\"deprecated\":true,\"description\":\"Deprecated. Use `entity_amount`.\",\"type\":\"number\"} while SingleTransaction.amount is typed \"type\":\"string\"",
+      "suggested_fix": "Declare one type for `amount` in both Transaction and SingleTransaction and state its unit (major units, e.g. dollars) in the description.",
+      "id": "P3-01",
+      "persona": "P3"
+    },
+    {
+      "title": "Split line item amount unit is stated but sign and range are not",
+      "location": "PATCH /developer/v1/transactions/{transaction_id} - ApiAccountingSplitLineItemRequestBody.amount",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "\"amount\":{\"description\":\"Amount in minor units (e.g. 5000 = $50.00).\",\"type\":\"integer\"} with no minimum; the parent says line item amounts must sum to the transaction amount, which may be negative for refunds",
+      "suggested_fix": "Document allowed sign and range (e.g. minimum, negative refund handling) and whether the minor unit depends on currency (e.g. JPY has no minor units).",
+      "id": "P3-02",
+      "persona": "P3"
+    },
+    {
+      "title": "Spend limit amounts lack minor unit and currency constraints on requests",
+      "location": "components.schemas.CurrencyAmountRequestBody.amount and currency_code",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "\"amount\":{\"description\":\"the amount of money represented in the smallest denomination...\",\"type\":\"integer\"} with no minimum; \"currency_code\":{\"default\":\"USD\",\"type\":\"string\"} with no enum, unlike ApiSignedAmount.currency which has a full ISO 4217 enum",
+      "suggested_fix": "Add minimum (e.g. 1 for positive limits), and constrain currency_code to the same ISO 4217 enum used elsewhere.",
+      "id": "P3-03",
+      "persona": "P3"
+    },
+    {
+      "title": "Reimbursement entity_amount/payee_amount units differ across schemas",
+      "location": "components.schemas.ApiReimbursementAmount.value vs CurrencyAmount.amount vs ApiReimbursementLineItem.amount",
+      "category": "consistency",
+      "severity": 2,
+      "evidence": "ApiReimbursementAmount uses \"value\" with minimum 0 and \"minor_unit_conversion_rate\"; CurrencyAmount uses \"amount\" and marks minor_unit_conversion_rate required and nullable; ApiSignedAmount uses \"value\" with no minimum",
+      "suggested_fix": "Use one amount shape (name, unit, nullability, sign rule) across all monetary fields, or document each variant's unit explicitly.",
+      "id": "P3-04",
+      "persona": "P3"
+    },
+    {
+      "title": "Mileage distance has no units constraint or range in response",
+      "location": "components.schemas.Reimbursement.distance and ApiMileageReimbursementCreateRequestBody.distance_units",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Reimbursement: \"distance\":{\"description\":\"The distance of the reimbursement in miles, for mileage reimbursements.\",\"type\":\"number\"}; request accepts \"distance_units\":{\"enum\":[\"KILOMETERS\",\"MILES\"]} but the response has no distance unit field and always says miles",
+      "suggested_fix": "Return distance_units alongside distance, or state the response is always miles; add minimum 0 to distance and document the oneOf decimal/number type.",
+      "id": "P3-05",
+      "persona": "P3"
+    },
+    {
+      "title": "Timestamps lack format and timezone in several fields",
+      "location": "components.schemas.Reimbursement.created_at, submitted_at, approved_at; examples like \"2023-08-20T:00:00+00:00\"; ApiReimbursementLineItem transaction_date",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Example values such as \"created_at\":\"2023-08-20T:00:00+00:00\" are not valid ISO 8601 (stray colon, no time); Reimbursement.transaction_date is \"format\":\"date\" while from_date filters are \"format\":\"date-time\"",
+      "suggested_fix": "Fix examples to valid RFC 3339 values and state the timezone the server uses for date and date-time filters.",
+      "id": "P3-06",
+      "persona": "P3"
+    },
+    {
+      "title": "Date filter semantics ambiguous for transactions and reimbursements",
+      "location": "GET /developer/v1/reimbursements - to_transaction_date, description \"Data.\"; GET /developer/v1/transactions - from_date/to_date",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "\"description\":\"Data.\" on to_transaction_date; from_transaction_date says \"(after this date)\" while to_date says \"before\" with no inclusive/exclusive or timezone stated; transaction from_date is described as user_transaction_time",
+      "suggested_fix": "Replace \"Data.\" with a real description and state inclusive/exclusive bounds and the timezone for each date filter.",
+      "id": "P3-07",
+      "persona": "P3"
+    },
+    {
+      "title": "Pagination size limit is inconsistent and undocumented for max on virtual cards",
+      "location": "GET /developer/v1/cards/virtual - page_size",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "\"page_size\" description on virtual cards and reimbursements: \"The value must be between 2 and 100\" but schema has only \"default\":20 with no minimum/maximum; virtual cards list has no page_size bounds enforced in schema, and the 'start' parameter is typed string with no format",
+      "suggested_fix": "Add minimum 2 and maximum 100 to page_size in every list endpoint schema, and state what happens when out of range (error code).",
+      "id": "P3-08",
+      "persona": "P3"
+    },
+    {
+      "title": "Pagination token and next-page link format is undefined",
+      "location": "components.schemas.DeveloperAPINestedPage.next and query parameter start",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "\"next\":{\"description\":\"the query to get to the next page; it is in the format of <BASE_URL>?<new_params>\"}; \"start\":{\"description\":\"The ID of the last entity of the previous page...\",\"type\":\"string\"}",
+      "suggested_fix": "Document that the start value is opaque or give its exact format, and describe what happens when next is null.",
+      "id": "P3-09",
+      "persona": "P3"
+    },
+    {
+      "title": "Count fields only present when include_count is set; cap behavior unclear",
+      "location": "GET /developer/v1/transactions - include_count and DeveloperAPICountedPage.total_count",
+      "category": "pagination",
+      "severity": 1,
+      "evidence": "\"total_count\":{\"description\":\"... Null when include_count is not set, or when the count could not be computed in time.\",\"nullable\":true,\"type\":\"integer\"}",
+      "suggested_fix": "State the timeout behavior and retry expectation; the null meaning is overloaded across two conditions.",
+      "id": "P3-10",
+      "persona": "P3"
+    },
+    {
+      "title": "Physical card list filters on state with no documented enum",
+      "location": "GET /developer/v1/cards/physical - include_activated_only and include_terminated_only",
+      "category": "documentation",
+      "severity": 1,
+      "evidence": "\"include_activated_only\":\"Filter only for activated cards. Defaults to True if not specified\" and \"include_terminated_only\" defaults to False; no combined behavior is specified when both are set",
+      "suggested_fix": "Define the result when both flags are true or false and whether terminated/unactivated cards are returned by default.",
+      "id": "P3-11",
+      "persona": "P3"
+    },
+    {
+      "title": "Reimbursement state filter documented but trace_id and funding_source nullability unclear",
+      "location": "components.schemas.Reimbursement.trace_id and funding_source",
+      "category": "schema-design",
+      "severity": 1,
+      "evidence": "\"trace_id\" is \"allOf\" ApiReimbursementTraceId with \"description\":\"... This field is returned on reimbursement detail responses.\" but list responses omit it; \"funding_source\" is nullable enum with the note \"Null means the funding source could not be determined\"",
+      "suggested_fix": "State explicitly in the list response docs that trace_id is absent, and document when funding_source is null versus PENDING.",
+      "id": "P3-12",
+      "persona": "P3"
+    },
+    {
+      "title": "Vault card creation response uses 201 but lacks error responses for limits",
+      "location": "POST /developer/v1/cards/vault - responses",
+      "category": "errors",
+      "severity": 1,
+      "evidence": "Responses list 201 and 400 only; security scopes include \"limits:write\" but no 401/403 defined, unlike mileage and receipt endpoints which list 401",
+      "suggested_fix": "Add 401 and 403 responses with DeveloperApiErrorResponse for consistency across endpoints.",
+      "id": "P3-13",
+      "persona": "P3"
+    },
+    {
+      "title": "Idempotency is inconsistent across write endpoints",
+      "location": "POST /developer/v1/cards/vault (header X-Idempotency-Key) vs POST /developer/v1/reimbursement/submit-receipt (body idempotency_key, required)",
+      "category": "idempotency",
+      "severity": 2,
+      "evidence": "Vault: \"X-Idempotency-Key\" header, \"required\":false; Receipt upload: \"idempotency_key\" required body field with description \"Caller-supplied key that makes upload retries idempotent.\"; other POSTs (physical cards, mileage) have no idempotency mechanism at all",
+      "suggested_fix": "Use one mechanism (header) on all create endpoints, make it required where retries can duplicate spend or payouts, and document the retention window and conflict behavior.",
+      "id": "P3-14",
+      "persona": "P3"
+    },
+    {
+      "title": "Approval states for reimbursements lack plain-language meaning",
+      "location": "components.schemas.Reimbursement.properties.state and GET /developer/v1/reimbursements state filter",
+      "category": "documentation",
+      "severity": 3,
+      "evidence": "Enum values such as 'INIT', 'PENDING', 'APPROVED', 'AWAITING_PAYMENT', 'PROCESSING', 'MANUALLY_REIMBURSED' appear with short labels like 'Init' and 'Payment Processing' but no explanation of what triggers each state or which is final.",
+      "suggested_fix": "Add a description for each state stating whether it is pending, approved, paid, or terminal, and what action moves it to the next state.",
+      "id": "P4-01",
+      "persona": "P4"
+    },
+    {
+      "title": "Transaction approval_status values are undefined",
+      "location": "GET /developer/v1/transactions query parameter approval_status",
+      "category": "documentation",
+      "severity": 3,
+      "evidence": "Enum: 'AWAITING_EMPLOYEE', 'AWAITING_EMPLOYEE_CHANGES_REQUESTED', 'AWAITING_REVIEWER', 'FULLY_APPROVED', etc., with no x-enum-descriptions and no description of who must act next.",
+      "suggested_fix": "Add x-enum-descriptions defining each approval_status, including who must act and what happens after each step.",
+      "id": "P4-02",
+      "persona": "P4"
+    },
+    {
+      "title": "No approval or audit trail fields on transactions or reimbursements",
+      "location": "components.schemas.Transaction and components.schemas.Reimbursement",
+      "category": "other",
+      "severity": 3,
+      "evidence": "Properties include only timestamps such as 'updated_at' and 'synced_at'; there is no field showing who approved, who rejected, or when approval happened for a transaction, and Reimbursement has 'approved_at' but no approver identity.",
+      "suggested_fix": "Add approved_by, approved_at, and a history/audit array identifying the actor and time for each approval action.",
+      "id": "P4-03",
+      "persona": "P4"
+    },
+    {
+      "title": "Reimbursement 'amount' and 'entity_amount' meaning unclear",
+      "location": "components.schemas.Reimbursement.properties.entity_amount, merchant_amount, payee_amount",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "entity_amount: 'The amount that the payor entity pays, in the entity's settlement currency.' merchant_amount: 'The amount originally submitted...'. payee_amount: 'Amount and currency received by the payee.' No statement of how a currency conversion or fee affects these, and no direct total field.",
+      "suggested_fix": "State explicitly which amount is the approved total for compliance reporting and how fees or FX differences are reflected between these three fields.",
+      "id": "P4-04",
+      "persona": "P4"
+    },
+    {
+      "title": "Transaction 'amount' is deprecated but still the only plain value",
+      "location": "components.schemas.Transaction.properties.amount and SingleTransaction.properties.amount",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "'amount': {'deprecated': true, 'description': 'Deprecated. Use `entity_amount`.'}; in SingleTransaction it is typed as 'string' while in Transaction it is 'number'.",
+      "suggested_fix": "Fix the type inconsistency between Transaction and SingleTransaction and state the removal date for amount.",
+      "id": "P4-05",
+      "persona": "P4"
+    },
+    {
+      "title": "Signed amounts: sign convention not defined for reports",
+      "location": "components.schemas.ApiSignedAmount.properties.value and Transaction.properties.entity_amount",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "'May be negative for refunds or credits.' and 'signed: refunds and credits can be negative.' No statement of whether a positive value means a charge or whether card spend is reported as positive or negative.",
+      "suggested_fix": "State the sign convention explicitly, e.g. 'Positive = money out of the business; negative = refund or credit.'",
+      "id": "P4-06",
+      "persona": "P4"
+    },
+    {
+      "title": "Transaction 'updated_at' is an approximation",
+      "location": "components.schemas.Transaction.properties.updated_at",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "'Approximate transaction updated timestamp used by the `updated_after` filter. Computed as the latest of user transaction time, settlement time, and transaction interaction state update time.'",
+      "suggested_fix": "Remove 'approximate' or document the exact error margin, since compliance logs rely on accurate change timestamps.",
+      "id": "P4-07",
+      "persona": "P4"
+    },
+    {
+      "title": "Date fields ambiguous between transaction, settlement, and accounting dates",
+      "location": "components.schemas.Transaction.properties.accounting_date, settlement_date, user_transaction_time; GET /developer/v1/transactions from_date/to_date",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "from_date: 'with a user_transaction_time after the given date'. accounting_date: 'Based on the cleared date, transaction date, or a manually overridden date, depending on your accounting preferences in Ramp.'",
+      "suggested_fix": "Specify which date each date filter uses and state whether the 'after' and 'before' boundaries are inclusive, and which date governs period-end reporting.",
+      "id": "P4-08",
+      "persona": "P4"
+    },
+    {
+      "title": "Reimbursement date filters are inconsistent in meaning",
+      "location": "GET /developer/v1/reimbursements query parameters to_transaction_date and to_date",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "to_transaction_date: 'Data.' Filter from_transaction_date: 'after this date'. from_date: 'created after this date'. The description for to_transaction_date is just 'Data.'",
+      "suggested_fix": "Replace 'Data.' with a real description and define each date filter by the exact field it compares.",
+      "id": "P4-09",
+      "persona": "P4"
+    },
+    {
+      "title": "Trace ID and payment fields lack explanation for reconciliation",
+      "location": "components.schemas.ApiReimbursementTraceId and Reimbursement.properties.payment_id",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "'trace_id': 'The bank-facing accountability reference for this reimbursement payment, when available.' 'payment_id': 'The unique identifier of the payment batch...' with no explanation of when trace_id is absent or how payment_id relates to payment_batch_id.",
+      "suggested_fix": "State when trace_id is null, and explain the relationship between payment_id and payment_batch_id.",
+      "id": "P4-10",
+      "persona": "P4"
+    },
+    {
+      "title": "Funding source values not defined for compliance",
+      "location": "components.schemas.Reimbursement.properties.funding_source",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "'RAMP_FUNDED does not confirm settlement.' and 'NOT_RAMP_FUNDED': 'No Ramp-funding evidence was found for the payment request.' Null is described only as 'could not be determined'.",
+      "suggested_fix": "Explain what a reviewer should do with null and NOT_RAMP_FUNDED, and whether settlement is confirmed by another field.",
+      "id": "P4-11",
+      "persona": "P4"
+    },
+    {
+      "title": "Physical card 'state' and 'is_suspended' may conflict",
+      "location": "components.schemas.PhysicalCard.properties.state and is_suspended",
+      "category": "consistency",
+      "severity": 2,
+      "evidence": "state enum includes 'SUSPENDED' while a separate 'is_suspended' boolean exists; the suspension endpoints say 'The suspension is revertable.' with no statement of what state is returned after suspend.",
+      "suggested_fix": "Document the relationship between state and is_suspended and state the value returned after suspend and unsuspend.",
+      "id": "P4-12",
+      "persona": "P4"
+    },
+    {
+      "title": "Card vault 'limit' and 'PCILimit' response missing change audit",
+      "location": "POST /developer/v1/cards/vault response PCILimit",
+      "category": "other",
+      "severity": 2,
+      "evidence": "Response includes 'created_at' and 'restrictions' but no field showing who created the limit or who last changed it; 'allowed_overage_percent_override' is described only as 'Fund-level override'.",
+      "suggested_fix": "Add created_by and updated_by fields and explain what 'allowed overage percent' means in dollar terms.",
+      "id": "P4-13",
+      "persona": "P4"
+    },
+    {
+      "title": "Mileage reimbursement 'distance' units unclear in response",
+      "location": "components.schemas.Reimbursement.properties.distance",
+      "category": "documentation",
+      "severity": 1,
+      "evidence": "'The distance of the reimbursement in miles, for mileage reimbursements.' while the create request accepts distance_units 'KILOMETERS' or 'MILES' and the response has no distance_units field.",
+      "suggested_fix": "Add a distance_units field to the response, or state that distance is always miles regardless of the request.",
+      "id": "P4-14",
+      "persona": "P4"
+    },
+    {
+      "title": "Auth scopes missing on POST /reimbursements/mileage",
+      "location": "POST /developer/v1/reimbursements/mileage",
+      "category": "security",
+      "severity": 3,
+      "evidence": "\"security\":[] with a 401 response; no oauth2 scope is declared for a write operation.",
+      "suggested_fix": "Declare the required scope (e.g. reimbursements:write) in security, as every other write operation does.",
+      "id": "P5-01",
+      "persona": "P5"
+    },
+    {
+      "title": "Operation summary contradicts its behavior: GET virtual card",
+      "location": "GET /developer/v1/cards/virtual/{card_id}",
+      "category": "naming",
+      "severity": 3,
+      "evidence": "\"summary\":\"Permanently delete this resource\" on a GET operation that returns a VirtualCard.",
+      "suggested_fix": "Change the summary to 'Fetch a virtual card'; the delete wording is wrong and would mislead tool selection.",
+      "id": "P5-02",
+      "persona": "P5"
+    },
+    {
+      "title": "Terminate and suspend operations have confusing overlapping descriptions",
+      "location": "DELETE /developer/v1/cards/physical/{card_id} and POST/DELETE /developer/v1/cards/physical/{card_id}/suspension",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "DELETE is 'Terminate a card' with description 'irreversible'; POST suspension says 'The suspension is revertable.' but the DELETE on /suspension is 'Unsuspend a card' with no description; no state transition is documented beyond PhysicalCard.state enum.",
+      "suggested_fix": "Add explicit descriptions stating which card states each operation accepts and the resulting state, so an agent can choose correctly.",
+      "id": "P5-03",
+      "persona": "P5"
+    },
+    {
+      "title": "Create physical card response code and schema mismatch with GET",
+      "location": "GET /developer/v1/cards/physical/{card_id}",
+      "category": "consistency",
+      "severity": 2,
+      "evidence": "Success is documented as \"201\" for a GET, while the POST create returns \"200\" and the other GETs return 200.",
+      "suggested_fix": "Document GET success as 200 and keep create as 201 consistently.",
+      "id": "P5-04",
+      "persona": "P5"
+    },
+    {
+      "title": "Two list endpoints for physical cards mismatch on operationId and filters",
+      "location": "POST /developer/v1/cards/physical",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "operationId \"post_physical_card_list_with_pagination\" on a create operation, and the GET list uses \"get_physical_card_list_with_pagination\" with no pagination parameters at all.",
+      "suggested_fix": "Rename operationIds to match their actions (create_physical_card) and add page/start/page_size parameters to the GET list.",
+      "id": "P5-05",
+      "persona": "P5"
+    },
+    {
+      "title": "Inconsistent pagination parameters across list endpoints",
+      "location": "GET /developer/v1/cards/physical, GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "Physical card list has no start/page_size; virtual cards use 'start' and 'page_size' (min 2, default 20); transactions adds include_count; cards/virtual uses 'userId' while others use 'user_id'.",
+      "suggested_fix": "Apply one pagination scheme to every list endpoint and use consistent snake_case filter names like user_id.",
+      "id": "P5-06",
+      "persona": "P5"
+    },
+    {
+      "title": "Physical card list parameter documented as default true but not in schema",
+      "location": "GET /developer/v1/cards/physical",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "include_activated_only: \"Defaults to True if not specified\" but the schema has no default field; the description and the 'x-beta' flag leave the behavior unclear.",
+      "suggested_fix": "Add 'default: true' to the schema and document combined behavior when include_terminated_only is also true.",
+      "id": "P5-07",
+      "persona": "P5"
+    },
+    {
+      "title": "Transaction split endpoint lacks success-response linkage details",
+      "location": "PATCH /developer/v1/transactions/{transaction_id}",
+      "category": "other",
+      "severity": 2,
+      "evidence": "Description says 'Send an empty line_items array to unsplit' but the request requires amounts summing to the transaction amount; no error response (400) is declared for a sum mismatch, unlike GET operations.",
+      "suggested_fix": "Declare a 400 response with DeveloperApiErrorResponse for invalid or non-summing line items.",
+      "id": "P5-08",
+      "persona": "P5"
+    },
+    {
+      "title": "Receipt upload 'idempotency_key' is duplicated and not in header",
+      "location": "POST /developer/v1/reimbursement/submit-receipt",
+      "category": "idempotency",
+      "severity": 2,
+      "evidence": "Body field idempotency_key is required; the vault endpoint instead takes an X-Idempotency-Key header with a 255-char limit; the receipt endpoint's path is also 'reimbursement' (singular) while others use 'reimbursements'.",
+      "suggested_fix": "Use the same X-Idempotency-Key header convention across create endpoints and align the path to /reimbursements/submit-receipt.",
+      "id": "P5-09",
+      "persona": "P5"
+    },
+    {
+      "title": "Mileage create endpoint has no way to fail on bad input",
+      "location": "POST /developer/v1/reimbursements/mileage",
+      "category": "errors",
+      "severity": 2,
+      "evidence": "Only a 200 and a 401 are documented; no 400 with DeveloperApiErrorResponse, though the other write endpoints document 400.",
+      "suggested_fix": "Add a 400 response returning DeveloperApiErrorResponse so agents can recover from invalid input.",
+      "id": "P5-10",
+      "persona": "P5"
+    },
+    {
+      "title": "Post-create card vault response uses PCILimit, unrelated to path",
+      "location": "POST /developer/v1/cards/vault",
+      "category": "schema-design",
+      "severity": 2,
+      "evidence": "Path is card vault creation but the 201 returns \"PCILimit\" with the card and restrictions nested; the summary says 'Create a spend limit and retrieve sensitive card details' while the required scope is cards:read_vault plus limits:write.",
+      "suggested_fix": "Rename the operation to reflect it creates a limit and card, and document both scopes as required together.",
+      "id": "P5-11",
+      "persona": "P5"
+    },
+    {
+      "title": "Parameter spend_allocation_id versus fund_id naming drift",
+      "location": "POST /developer/v1/reimbursements/mileage and GET /developer/v1/reimbursements",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "Mileage body uses 'spend_allocation_id' (described as a fund id), while the response and spec use 'fund_id' and the deprecated 'spend_limit_id'; the card vault body uses 'spend_program_id' with 'limit' terminology.",
+      "suggested_fix": "Use one identifier name for the fund concept across request and response bodies, and mark deprecated aliases consistently.",
+      "id": "P5-12",
+      "persona": "P5"
+    },
+    {
+      "title": "Transaction 'amount' documented as deprecated but still required path",
+      "location": "SingleTransaction and Transaction schemas, property 'amount'",
+      "category": "schema-design",
+      "severity": 1,
+      "evidence": "'amount' is type number in Transaction but type string in SingleTransaction, with 'Deprecated. Use entity_amount.'",
+      "suggested_fix": "Make the type of amount identical in both schemas, or remove it in favor of entity_amount.",
+      "id": "P5-13",
+      "persona": "P5"
+    },
+    {
+      "title": "Two transaction tags with overlapping names",
+      "location": "tags: 'Transaction' and 'transactions' on PATCH /developer/v1/transactions/{transaction_id}",
+      "category": "naming",
+      "severity": 1,
+      "evidence": "tags: [\"Transaction\",\"transactions\"] and a separate tag entry named \"transactions\" with no description.",
+      "suggested_fix": "Remove the duplicate 'transactions' tag and keep one tag per resource.",
+      "id": "P5-14",
+      "persona": "P5"
+    },
+    {
+      "title": "No rate limit, retry, or backoff guidance anywhere in spec",
+      "location": "info / components.securitySchemes",
+      "category": "documentation",
+      "severity": 3,
+      "evidence": "No operation or the info block documents rate limits, 429 responses, Retry-After headers, or what clients should do after a failed or timed-out request.",
+      "suggested_fix": "Document per-key rate limits, 429 response shape with Retry-After, and recommended retry/backoff behavior for 5xx and network errors.",
+      "id": "P6-01",
+      "persona": "P6"
+    },
+    {
+      "title": "Most write operations lack idempotency keys",
+      "location": "POST /developer/v1/cards/physical, POST /developer/v1/reimbursements/mileage, POST /developer/v1/cards/vault",
+      "category": "idempotency",
+      "severity": 3,
+      "evidence": "Only POST /developer/v1/cards/vault defines X-Idempotency-Key (optional); POST /developer/v1/cards/physical and POST /developer/v1/reimbursements/mileage have no idempotency mechanism, yet create resources and have no 409/429 responses documented.",
+      "suggested_fix": "Add an idempotency mechanism (header or body key, with documented retention window and replay behavior) to every POST that creates resources, and make it required or clearly documented as optional.",
+      "id": "P6-02",
+      "persona": "P6"
+    },
+    {
+      "title": "Idempotency key defined inconsistently across two endpoints",
+      "location": "POST /developer/v1/reimbursement/submit-receipt; components.schemas.ApiReimbursementUploadReceiptRequestRequestBody.properties.idempotency_key",
+      "category": "idempotency",
+      "severity": 2,
+      "evidence": "Receipt upload takes a required body field 'idempotency_key' with no length or format limits, while cards/vault uses header 'X-Idempotency-Key' (optional, max 255 chars, min 1).",
+      "suggested_fix": "Use one mechanism (header X-Idempotency-Key) with the same constraints and documented scope/expiry across all endpoints.",
+      "id": "P6-03",
+      "persona": "P6"
+    },
+    {
+      "title": "Pagination is inconsistent across list endpoints",
+      "location": "GET /developer/v1/cards/physical; GET /developer/v1/cards/virtual; GET /developer/v1/reimbursements; GET /developer/v1/transactions",
+      "category": "pagination",
+      "severity": 3,
+      "evidence": "Physical cards list has no start or page_size parameter and returns DeveloperAPINestedPage with no bound; virtual cards and reimbursements/transactions accept 'start' and 'page_size' (default 20, 'between 2 and 100'); transactions alone return DeveloperAPICountedPage with total_count.",
+      "suggested_fix": "Apply one pagination scheme (cursor params, default and maximum page size, next-page semantics) to every list endpoint, including physical cards.",
+      "id": "P6-04",
+      "persona": "P6"
+    },
+    {
+      "title": "Physical card list is unpaginated and unbounded",
+      "location": "GET /developer/v1/cards/physical",
+      "category": "pagination",
+      "severity": 3,
+      "evidence": "The operation's parameters are only user_id, display_name, include_activated_only, include_terminated_only, yet the response is a PaginatedResponseApiPhysicalCardResource with a 'page.next' link.",
+      "suggested_fix": "Add start and page_size parameters with documented defaults and maximum, matching the other list endpoints.",
+      "id": "P6-05",
+      "persona": "P6"
+    },
+    {
+      "title": "page_size bounds and default are only described in prose",
+      "location": "GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions (page_size)",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "Description says 'must be between 2 and 100' but schema is only {default:20, type:integer} with no minimum or maximum; behavior when value is out of range (error or clamp) is unstated.",
+      "suggested_fix": "Express bounds as schema minimum: 2 and maximum: 100, and document the error or clamping behavior for out-of-range values.",
+      "id": "P6-06",
+      "persona": "P6"
+    },
+    {
+      "title": "Pagination cursor 'start' is an opaque ID but described as entity ID",
+      "location": "GET /developer/v1/cards/virtual, GET /developer/v1/reimbursements, GET /developer/v1/transactions (start)",
+      "category": "pagination",
+      "severity": 2,
+      "evidence": "'start' is described as \"The ID of the last entity of the previous page\", yet the 'next' link is a full URL and clients are not told whether to use the link or build the param; no stability or end-of-list guidance is given.",
+      "suggested_fix": "Describe start as an opaque cursor, state that clients should follow page.next, and document end-of-results behavior and cursor stability.",
+      "id": "P6-07",
+      "persona": "P6"
+    },
+    {
+      "title": "Pagination nested-page vs counted-page schemas diverge",
+      "location": "components.schemas.DeveloperAPINestedPage vs components.schemas.DeveloperAPICountedPage",
+      "category": "consistency",
+      "severity": 2,
+      "evidence": "Nested page has only 'next'; counted page requires 'next', 'total_count', 'total_count_capped', and include_count defaults to false, returning null total_count when omitted.",
+      "suggested_fix": "Unify the page object so total_count fields are always present (null when not requested) across all list responses.",
+      "id": "P6-08",
+      "persona": "P6"
+    },
+    {
+      "title": "Inconsistent query parameter naming style",
+      "location": "GET /developer/v1/cards/virtual (userId); GET /developer/v1/transactions (orderByAmountAsc, order_by_amount_desc)",
+      "category": "naming",
+      "severity": 2,
+      "evidence": "Parameter 'userId' is camelCase while every other parameter is snake_case (e.g. user_id); transactions has 'orderByAmountAsc' alongside 'order_by_amount_desc'.",
+      "suggested_fix": "Rename to snake_case (user_id, order_by_amount_asc) and deprecate the old names with a documented transition period.",
+      "id": "P6-09",
+      "persona": "P6"
+    },
+    {
+      "title": "Overlapping and deprecated filter parameters on reimbursements",
+      "location": "GET /developer/v1/reimbursements (sync_ready, has_no_sync_commits, sync_status); GET /developer/v1/reimbursements (user_id, awaiting_approval_by_user_id)",
+      "category": "consistency",
+      "severity": 2,
+      "evidence": "sync_status 'Supersedes has_no_sync_commits and sync_ready', yet all three remain; the 'user_id' parameter has no description while similar 'Filter by card owner' parameters do; the same overlap exists in transactions.",
+      "suggested_fix": "Mark sync_ready and has_no_sync_commits as deprecated with a removal plan and document precedence when combined.",
+      "id": "P6-10",
+      "persona": "P6"
+    },
+    {
+      "title": "Unclear or placeholder parameter descriptions",
+      "location": "GET /developer/v1/reimbursements (to_transaction_date); GET /developer/v1/transactions (min_amount, max_amount, sk_category_id)",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "to_transaction_date is described only as \"Data.\"; from_transaction_date says 'after this date' while to_date/from_date on transactions say 'before'/'after' with no inclusivity or timezone; min_amount has no unit statement beyond 'U.S. Dollar denominated' and the same 'larger amount that the given amount' wording is ambiguous.",
+      "suggested_fix": "Replace 'Data.' with a real description, state inclusive/exclusive bounds and timezone, and clarify min/max amount semantics and units.",
+      "id": "P6-11",
+      "persona": "P6"
+    },
+    {
+      "title": "Same operation has conflicting HTTP method semantics and summaries",
+      "location": "/developer/v1/cards/virtual/{card_id} GET; /developer/v1/cards/physical/{card_id}/suspension DELETE and POST",
+      "category": "documentation",
+      "severity": 3,
+      "evidence": "GET /cards/virtual/{card_id} is summarized \"Permanently delete this resource\" while it only fetches; the physical suspension DELETE is 'Unsuspend a card' and POST is 'Suspend a card' with no error responses for DELETE.",
+      "suggested_fix": "Correct the summary to 'Fetch a virtual card' and ensure every operation's summary matches its method.",
+      "id": "P6-12",
+      "persona": "P6"
+    },
+    {
+      "title": "Inconsistent success status codes and undocumented error responses",
+      "location": "GET /developer/v1/cards/physical/{card_id} (201); POST /developer/v1/cards/physical (200 with string 400); PATCH /developer/v1/cards/physical/{card_id}",
+      "category": "errors",
+      "severity": 3,
+      "evidence": "Fetch returns 201; create returns 200 and its 400 body is schema type 'string' instead of DeveloperApiErrorResponse; PATCH, GET virtual, and several others define no 400/401 errors despite auth and validation.",
+      "suggested_fix": "Use 200 for reads, 201 for creates, and a single DeveloperApiErrorResponse schema for every 4xx; document 401/403/404/429 uniformly.",
+      "id": "P6-13",
+      "persona": "P6"
+    },
+    {
+      "title": "Reimbursement 'state' enum conflicts with 'funding_source' and vague wording",
+      "location": "components.schemas.Reimbursement.properties.state; components.schemas.Reimbursement.properties.funding_source",
+      "category": "documentation",
+      "severity": 2,
+      "evidence": "state enum includes EXPORTED, EXPORT_SUCCESSFUL, REIMBURSED, REIMBURSED_VIA_PUSH and PUSH_PAYMENT_INITIATED, labeled 'Paid' vs 'Payment successful' vs 'Paid' for different values; funding_source says \"RAMP_FUNDED does not confirm settlement\" which is unclear to non-experts.",
+      "suggested_fix": "Define each state with a unique, non-overlapping label and state a clear client-facing meaning and terminal-vs-transient classification.",
+      "id": "P6-14",
+      "persona": "P6"
+    }
+  ]
+}

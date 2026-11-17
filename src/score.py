@@ -151,6 +151,7 @@ def main():
     ap.add_argument("--model", default=DEV_MODEL, help="judge model")
     ap.add_argument("--labels", help="hand-label CSV to check the judge against")
     ap.add_argument("--concurrency", type=int, default=5)
+    ap.add_argument("--out-dir", default="results/scores")
     args = ap.parse_args()
 
     run = json.loads(Path(args.run).read_text())
@@ -181,7 +182,7 @@ def main():
     if args.labels:
         report["judge_vs_labels"] = compare_with_labels(verdicts, args.labels)
         
-    out = Path("results/scores") / f"{Path(args.run).stem}__judge-{args.model}.json"
+    out = Path(args.out_dir) / f"{Path(args.run).stem}__judge-{args.model}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2))
     print(f"Saved to {out}")

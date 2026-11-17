@@ -88,6 +88,8 @@ def main():
     ap.add_argument("--model", default=DEV_MODEL)
     ap.add_argument("--max-findings", type=int, default=15)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--method", default="swarm",
+                    help="label stored in the results file, e.g. swarm or control")
     args = ap.parse_args()
 
     personas = json.loads(Path(args.personas).read_text())["personas"]
@@ -103,10 +105,10 @@ def main():
     failed = [r["persona"] for r in reviews if "error" in r]
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    out = Path(args.out or f"results/swarm_{args.model}_{stamp}.json")
+    out = Path(args.out or f"results/{args.method}_{args.model}_{stamp}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({
-        "method": "swarm", "model": args.model, "spec": args.spec,
+        "method": args.method, "model": args.model, "spec": args.spec,
         "personas_file": args.personas, "max_findings": args.max_findings,
         "timestamp": stamp, "usage": usage, "seconds": elapsed, "failed": failed,
         "reviews": reviews, "findings": findings,

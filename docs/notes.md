@@ -180,7 +180,8 @@ Using the snapshot in `data/`, step 1 regenerates the committed benchmark. A fre
 - [x] **6. Swarm:** persona reviewers in parallel, with prompt caching and failure isolation
 - [ ] **7. Aggregation:** merge duplicate findings across personas
 - [ ] **8. Scorer:** match findings to the answer key (location filter plus an LLM judge checked against hand labels); report recall, severity-weighted recall and unmatched findings
-- [ ] **9. Experiments:** baseline vs swarm vs same-budget baseline, repeated runs, on Haiku and Sonnet
+- [x] **9a. Experiment on Haiku:** baseline vs swarm vs control (six identical generalists), 3 interleaved repeats (`src/experiment.py`)
+- [ ] **9b. Same experiment with Sonnet reviewers**
 - [ ] **10. Results:** final tables and charts in the README, plus failure analysis
 
 Stretch ideas:
@@ -203,6 +204,11 @@ Stretch ideas:
 - **The baseline misses schema-level absences:** on the 2026-11-16 Haiku baseline, all 4 misses were in `components.schemas`, and 3 of them were something removed (a `required` marker, an enum). Reviewers spot what is wrong on the page more easily than what is missing.
 - **Not every extra finding is a false positive:** the baseline reported ~15 issues that weren't planted, and many may be real issues in the original spec. Running the baseline on `spec_clean.json` measures that background rate.
 - **Judges read instructions literally:** the first judge run agreed with my labels on 15 of 19. It treated the exact removed item ('400') as required, and down-weighted problems mentioned outside a finding's main point. Two general clarifications to the prompt fixed both, without mentioning any specific defect, to avoid tuning the judge to my 19 labels.
+- **One run is an anecdote:** the first single-run comparison suggested the security persona was the only one to catch the exposed full card number (D18). Across 3 repeats, six identical generalists caught it in 3 of 3 runs. The persona story did not replicate.
+- **Control the variable you are testing:** "six baseline runs merged" would have cost ~6× the baseline against the swarm's 1.8× and allowed 30 findings per reviewer instead of 15. The control instead reuses the swarm code with six identical generalist prompts, so only reviewer diversity differs.
+- **Measured cost depends on run order:** a run that starts within 5 minutes of another run with the same spec reads its cache and skips the write, so the control looked about 40% cheaper than the swarm. Recomputing every run as if from a cold cache showed they cost the same (1.8× the baseline).
+- **Identical reviewers converge; personas spread out:** 58% of the control's findings targeted a planted defect against 41% of the swarm's. The benchmark only rewards planted defects, so whatever extra value persona diversity adds elsewhere is invisible to it.
+- **Some defects are never caught:** removed `required` markers and a removed enum (D14–D16) were caught in 0 of 27 runs, by any method.
 
 
 ## Talking points
@@ -210,14 +216,15 @@ Stretch ideas:
 Short answers I can expand on, each tied to something I built and measured.
 
 1. **The evaluation problem.** "LLM review output is easy to demo and hard to measure. I planted 19 known defects in a real API spec so every review gets a recall score against an answer key, instead of being judged by eye."
-2. **A fair comparison.** "Six reviewers spend six times the tokens, so beating one reviewer proves little. I added a same-budget baseline, one reviewer run six times, to separate the value of different perspectives from the value of more attempts."
+2. **A controlled comparison.** "Six reviewers make six attempts, so beating one reviewer proves little. My control used the same swarm code, cost and caching, but with six identical generalist reviewers. Only reviewer diversity differed between swarm and control."
 3. **Cost and latency engineering.** "The personas share a 71k-token spec. I put it first in the prompt so it forms a cacheable prefix, ran one persona to warm the cache, then the rest in parallel. 99% of input was cached: the swarm cost 1.8× the baseline's input instead of 6×, at 1.3× the latency."
 4. **Reliability in multi-agent systems.** "One agent returned malformed JSON and crashed the run, losing five good reviews. I fixed the cause with schema enforcement (strict tool use) and the blast radius with per-agent failure isolation, so failures are recorded and flagged rather than silent or fatal."
 5. **Adapting to model differences.** "Newer models dropped support for forced tool use. Because all model-specific logic lived in one adapter, switching those models to native structured outputs was a one-file change."
 6. **Honest metrics.** "With caching, the API's `input_tokens` field covers only uncached tokens. Reporting it alone would have made the swarm look almost free, so I track all three input counts and a price-weighted total."
 7. **Reproducibility.** "Fixed seeds for defects and personas, a pinned spec snapshot, deterministic slicing, and one JSON file per run with findings, tokens and timing."
-8. **Interpreting a tie honestly.** "My first comparison was 14 of 19 each, but on different defects: the security persona caught the most serious one, which the generalist missed, and the generalist caught two minor documentation gaps no persona covered. I reported it as inconclusive until repeated runs and a same-budget control, rather than claiming a win."
-
+8. **Interpreting a tie honestly.** "My first single-run comparison was 14 of 19 each, on different defects, and it looked like the security persona had caught the most serious one that the generalist missed. I reported it as inconclusive rather than a win, and the repeated, controlled experiment showed that impression did not hold up."
+9. **A negative result, reported straight.** "On Haiku, with 3 repeats per method, personas did not measurably beat six identical generalists: 72% versus 70% recall, inside a run-to-run range of up to 16 points. Both edged out a single reviewer by a similar margin. A result from my first single run did not replicate, and that is why I repeat runs and use a control."
+10. **Using the data to decide what to try next.** "Three defects where a constraint was removed were caught in 0 of 27 runs. That is a concrete target: a persona or a deterministic check aimed at missing constraints, measured with the same experiment."
 
 
 ## Git workflow used in this project
@@ -229,4 +236,3 @@ Short answers I can expand on, each tied to something I built and measured.
 - `git checkout -b <branch>`: start a feature branch from the current branch
 - `git push -u origin <branch>`: first push of a new branch; links local and GitHub branches so later a plain `git push` works
 - Pull request on GitHub, then `git checkout main && git pull`: merge finished work into `main` and bring it back to the local copy
-
