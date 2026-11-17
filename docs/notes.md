@@ -11,6 +11,8 @@ To answer that, the project has two parts:
 1. **A test with a known answer key.** Take a real spec, deliberately plant known defects in it, and record each one. Any review can then be scored: "found 14 of 19 known problems" instead of "found some stuff".
 2. **A comparison of two review approaches** using that test.
 
+
+
 ## Approach
 
 ```
@@ -24,11 +26,15 @@ spec with planted defects
 
 ```
 
+
+
 ### The benchmark (ground truth)
 
 - **Real spec:** a slice of Ramp's public Developer API (cards, transactions, reimbursements). It's real, so the review task is realistic, and the slice fits in one prompt (about 71k input tokens on the first Haiku run).
 - **Planted defects:** `plant_defects.py` deliberately breaks the spec in 19 known ways, e.g. removing authentication from a write endpoint, renaming a parameter to camelCase, or adding a field that exposes full card numbers.
 - **Answer key:** every planted defect is recorded in `answer_key.json` with its location, severity and a hint describing what a good finding says.
+
+
 
 ### Baseline: one general reviewer
 
@@ -75,11 +81,13 @@ The rest of the code calls `call_structured()` without knowing which method ran 
 - **Fault isolation.** Each persona's call is wrapped in `try/except`. A failure is printed, stored in the results file under `failed`, and the run is flagged as incomplete, instead of crashing and losing every other persona's work. Non-object findings are dropped and counted.
 - **Token accounting.** With caching, the API splits input three ways: `input_tokens` (uncached only), `cache_creation_input_tokens` (written) and `cache_read_input_tokens` (read). Total input is the sum. `llm.py` records all three; reporting `input_tokens` alone would make the swarm look almost free.
 
+
+
 ### Scoring rubric
 
 Used for hand labels (`data/hand_labels_baseline.csv`) and, word for word, in the LLM judge's prompt.
 
-- **hit:** the finding identifies the planted problem at the right location. Category label, wording and extra detail do not matter. The problem may be stated in the title or the evidence, as long as it is stated as a problem.
+- **hit:** the finding identifies the planted problem at the right location. Category label, wording and extra detail do not matter. The problem may be stated in the title or the evidence, as long as it is stated as a problem; it still counts if the finding's main topic is a different problem.
 - **partial:** right location, but the planted problem is only implied, or a different problem is described there.
 - **miss:** no finding describes the planted problem.
 - A defect can be matched by several findings; one finding can match several defects.
@@ -100,6 +108,8 @@ Used for hand labels (`data/hand_labels_baseline.csv`) and, word for word, in th
 | agent-readiness | 2     | vague parameter descriptions ("Filter.", "Value.")                    |
 | security        | 2     | write endpoint with `security: []`, `full_card_number` exposed        |
 | pagination      | 1     | list endpoint with paging params removed                              |
+
+
 
 
 ## Repository layout
@@ -125,6 +135,8 @@ results/              # one JSON file per review run (findings, tokens, time)
 
 ```
 
+
+
 ## Setup
 
 ```bash
@@ -134,6 +146,8 @@ echo "ANTHROPIC_API_KEY=sk-..." > .env
 python src/hello.py          # should print: setup works
 
 ```
+
+
 
 ## Reproducing
 
@@ -175,6 +189,8 @@ Stretch ideas:
 - **Tool-using reviewers:** give agents `list_operations` / `get_schema` tools instead of the whole spec, and compare quality, tokens and latency.
 - **Prompt-injection defect:** plant an instruction inside a description and check whether reviewers stay on task.
 
+
+
 ## Lessons so far
 
 - **Token estimates:** characters ÷ 4 underestimates JSON. The slice was estimated at ~43k tokens but the API reported ~71k on the first Haiku run (2026-10-23). Use the API's `usage` numbers for cost.
@@ -186,8 +202,10 @@ Stretch ideas:
 - **Hand labels need a written rubric and a second pass:** my first labels and a second labeller agreed on 13 of 19 defects. The fixes: a written rubric for judgment calls, and a location filter so findings buried in other findings are not overlooked.
 - **The baseline misses schema-level absences:** on the 2026-11-16 Haiku baseline, all 4 misses were in `components.schemas`, and 3 of them were something removed (a `required` marker, an enum). Reviewers spot what is wrong on the page more easily than what is missing.
 - **Not every extra finding is a false positive:** the baseline reported ~15 issues that weren't planted, and many may be real issues in the original spec. Running the baseline on `spec_clean.json` measures that background rate.
+- **Judges read instructions literally:** the first judge run agreed with my labels on 15 of 19. It treated the exact removed item ('400') as required, and down-weighted problems mentioned outside a finding's main point. Two general clarifications to the prompt fixed both, without mentioning any specific defect, to avoid tuning the judge to my 19 labels.
 
-## Interview talking points
+
+## Talking points
 
 Short answers I can expand on, each tied to something I built and measured.
 
@@ -198,6 +216,9 @@ Short answers I can expand on, each tied to something I built and measured.
 5. **Adapting to model differences.** "Newer models dropped support for forced tool use. Because all model-specific logic lived in one adapter, switching those models to native structured outputs was a one-file change."
 6. **Honest metrics.** "With caching, the API's `input_tokens` field covers only uncached tokens. Reporting it alone would have made the swarm look almost free, so I track all three input counts and a price-weighted total."
 7. **Reproducibility.** "Fixed seeds for defects and personas, a pinned spec snapshot, deterministic slicing, and one JSON file per run with findings, tokens and timing."
+8. **Interpreting a tie honestly.** "My first comparison was 14 of 19 each, but on different defects: the security persona caught the most serious one, which the generalist missed, and the generalist caught two minor documentation gaps no persona covered. I reported it as inconclusive until repeated runs and a same-budget control, rather than claiming a win."
+
+
 
 ## Git workflow used in this project
 
@@ -208,3 +229,4 @@ Short answers I can expand on, each tied to something I built and measured.
 - `git checkout -b <branch>`: start a feature branch from the current branch
 - `git push -u origin <branch>`: first push of a new branch; links local and GitHub branches so later a plain `git push` works
 - Pull request on GitHub, then `git checkout main && git pull`: merge finished work into `main` and bring it back to the local copy
+
