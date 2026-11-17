@@ -1,0 +1,274 @@
+{
+  "model": "claude-haiku-5-5",
+  "judge": "claude-sonnet-5-5",
+  "summary": {
+    "baseline": {
+      "runs": 3,
+      "recall": {
+        "mean": 0.684,
+        "min": 0.632,
+        "max": 0.737
+      },
+      "sev_recall": {
+        "mean": 0.702,
+        "min": 0.658,
+        "max": 0.763
+      },
+      "findings": {
+        "mean": 32,
+        "min": 27,
+        "max": 36
+      },
+      "input_cost": {
+        "mean": 71234,
+        "min": 71234,
+        "max": 71234
+      },
+      "output_tokens": {
+        "mean": 5099,
+        "min": 4247,
+        "max": 5708
+      },
+      "seconds": {
+        "mean": 21.633,
+        "min": 18.4,
+        "max": 23.6
+      },
+      "incomplete_runs": 0
+    },
+    "swarm": {
+      "runs": 3,
+      "recall": {
+        "mean": 0.719,
+        "min": 0.684,
+        "max": 0.737
+      },
+      "sev_recall": {
+        "mean": 0.763,
+        "min": 0.711,
+        "max": 0.789
+      },
+      "findings": {
+        "mean": 87.667,
+        "min": 86,
+        "max": 90
+      },
+      "input_cost": {
+        "mean": 128162.0,
+        "min": 128162.0,
+        "max": 128162.0
+      },
+      "output_tokens": {
+        "mean": 18378.667,
+        "min": 18025,
+        "max": 18653
+      },
+      "seconds": {
+        "mean": 28.167,
+        "min": 27.9,
+        "max": 28.4
+      },
+      "incomplete_runs": 0
+    },
+    "control": {
+      "runs": 3,
+      "recall": {
+        "mean": 0.702,
+        "min": 0.632,
+        "max": 0.789
+      },
+      "sev_recall": {
+        "mean": 0.746,
+        "min": 0.684,
+        "max": 0.816
+      },
+      "findings": {
+        "mean": 84.333,
+        "min": 83,
+        "max": 86
+      },
+      "input_cost": {
+        "mean": 126473.0,
+        "min": 126473.0,
+        "max": 126473.0
+      },
+      "output_tokens": {
+        "mean": 15497.667,
+        "min": 15451,
+        "max": 15589
+      },
+      "seconds": {
+        "mean": 25.633,
+        "min": 25.0,
+        "max": 26.5
+      },
+      "incomplete_runs": 0
+    }
+  },
+  "caught_counts": {
+    "baseline": {
+      "D01": 2,
+      "D02": 3,
+      "D03": 3,
+      "D04": 1,
+      "D05": 3,
+      "D06": 1,
+      "D07": 1,
+      "D08": 3,
+      "D09": 3,
+      "D10": 3,
+      "D11": 3,
+      "D12": 3,
+      "D13": 3,
+      "D14": 0,
+      "D15": 0,
+      "D16": 0,
+      "D17": 3,
+      "D18": 1,
+      "D19": 3
+    },
+    "swarm": {
+      "D01": 3,
+      "D02": 3,
+      "D03": 3,
+      "D04": 3,
+      "D05": 3,
+      "D06": 0,
+      "D07": 0,
+      "D08": 3,
+      "D09": 3,
+      "D10": 3,
+      "D11": 3,
+      "D12": 3,
+      "D13": 3,
+      "D14": 0,
+      "D15": 0,
+      "D16": 0,
+      "D17": 3,
+      "D18": 2,
+      "D19": 3
+    },
+    "control": {
+      "D01": 3,
+      "D02": 3,
+      "D03": 3,
+      "D04": 2,
+      "D05": 3,
+      "D06": 1,
+      "D07": 0,
+      "D08": 2,
+      "D09": 2,
+      "D10": 3,
+      "D11": 3,
+      "D12": 3,
+      "D13": 3,
+      "D14": 0,
+      "D15": 0,
+      "D16": 0,
+      "D17": 3,
+      "D18": 3,
+      "D19": 3
+    }
+  },
+  "runs": [
+    {
+      "method": "baseline",
+      "run": "baseline_r1.json",
+      "recall": 0.684,
+      "sev_recall": 0.684,
+      "findings": 33,
+      "input_cost": 71234,
+      "output_tokens": 5342,
+      "seconds": 22.9,
+      "failed": []
+    },
+    {
+      "method": "baseline",
+      "run": "baseline_r2.json",
+      "recall": 0.737,
+      "sev_recall": 0.763,
+      "findings": 36,
+      "input_cost": 71234,
+      "output_tokens": 5708,
+      "seconds": 23.6,
+      "failed": []
+    },
+    {
+      "method": "baseline",
+      "run": "baseline_r3.json",
+      "recall": 0.632,
+      "sev_recall": 0.658,
+      "findings": 27,
+      "input_cost": 71234,
+      "output_tokens": 4247,
+      "seconds": 18.4,
+      "failed": []
+    },
+    {
+      "method": "control",
+      "run": "control_r1.json",
+      "recall": 0.632,
+      "sev_recall": 0.684,
+      "findings": 83,
+      "input_cost": 126473.0,
+      "output_tokens": 15453,
+      "seconds": 25.4,
+      "failed": []
+    },
+    {
+      "method": "control",
+      "run": "control_r2.json",
+      "recall": 0.789,
+      "sev_recall": 0.816,
+      "findings": 84,
+      "input_cost": 126473.0,
+      "output_tokens": 15589,
+      "seconds": 26.5,
+      "failed": []
+    },
+    {
+      "method": "control",
+      "run": "control_r3.json",
+      "recall": 0.684,
+      "sev_recall": 0.737,
+      "findings": 86,
+      "input_cost": 126473.0,
+      "output_tokens": 15451,
+      "seconds": 25.0,
+      "failed": []
+    },
+    {
+      "method": "swarm",
+      "run": "swarm_r1.json",
+      "recall": 0.684,
+      "sev_recall": 0.711,
+      "findings": 86,
+      "input_cost": 128162.0,
+      "output_tokens": 18025,
+      "seconds": 28.2,
+      "failed": []
+    },
+    {
+      "method": "swarm",
+      "run": "swarm_r2.json",
+      "recall": 0.737,
+      "sev_recall": 0.789,
+      "findings": 90,
+      "input_cost": 128162.0,
+      "output_tokens": 18653,
+      "seconds": 28.4,
+      "failed": []
+    },
+    {
+      "method": "swarm",
+      "run": "swarm_r3.json",
+      "recall": 0.737,
+      "sev_recall": 0.789,
+      "findings": 87,
+      "input_cost": 128162.0,
+      "output_tokens": 18458,
+      "seconds": 27.9,
+      "failed": []
+    }
+  ]
+}

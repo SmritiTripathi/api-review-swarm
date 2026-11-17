@@ -1,0 +1,349 @@
+{
+  "run": "results/experiments/20261117-130543_claude-haiku-5-5/baseline_r1.json",
+  "method": "baseline",
+  "review_model": "claude-haiku-5-5",
+  "judge_model": "claude-sonnet-5-5",
+  "metrics": {
+    "defects": 19,
+    "hits": 13,
+    "partials": 1,
+    "recall": 0.684,
+    "recall_incl_partial": 0.737,
+    "severity_weighted_recall": 0.684,
+    "findings": 33,
+    "findings_matching_a_defect": 14
+  },
+  "verdicts": [
+    {
+      "defect": "D01",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B15",
+        "B14"
+      ],
+      "reason": "B15 directly states that GET /developer/v1/cards/physical has no pagination parameters despite being described as paginated, and B14 also notes the missing page_size/start parameters on this endpoint.",
+      "candidates": [
+        "B06",
+        "B08",
+        "B14",
+        "B15",
+        "B20",
+        "B28"
+      ],
+      "usage": {
+        "input_tokens": 1468,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 98
+      }
+    },
+    {
+      "defect": "D02",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B11"
+      ],
+      "reason": "B11 identifies that GET /developer/v1/cards/virtual's 'userId' parameter is camelCase while sibling parameters like user_id use snake_case, which is exactly the planted defect.",
+      "candidates": [
+        "B09",
+        "B11",
+        "B14",
+        "B16"
+      ],
+      "usage": {
+        "input_tokens": 1291,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 96
+      }
+    },
+    {
+      "defect": "D03",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B12"
+      ],
+      "reason": "B12 identifies at the right location that 'orderByAmountAsc' is camelCase while sibling sort parameters use snake_case, which is exactly the planted defect.",
+      "candidates": [
+        "B12",
+        "B19"
+      ],
+      "usage": {
+        "input_tokens": 1049,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 86
+      }
+    },
+    {
+      "defect": "D04",
+      "verdict": "partial",
+      "matched_finding_ids": [
+        "B03"
+      ],
+      "reason": "B03 covers the DELETE suspension location and complains about missing error responses (404), but it states that 400 is still listed, so it does not identify that the operation has no documented 4xx/5xx responses at all.",
+      "candidates": [
+        "B03",
+        "B30"
+      ],
+      "usage": {
+        "input_tokens": 1042,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 97
+      }
+    },
+    {
+      "defect": "D05",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B09"
+      ],
+      "reason": "B09 explicitly lists PATCH /developer/v1/cards/physical/{card_id} as an operation that declares only 200 and no error responses, which is the planted defect of the missing 4xx documentation.",
+      "candidates": [
+        "B03",
+        "B05",
+        "B09",
+        "B31"
+      ],
+      "usage": {
+        "input_tokens": 1244,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 99
+      }
+    },
+    {
+      "defect": "D06",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "None of the findings state that POST /developer/v1/cards/vault lacks a description; B07 and B28 address the response schema and idempotency at that location, and B06 concerns status codes.",
+      "candidates": [
+        "B06",
+        "B07",
+        "B28"
+      ],
+      "usage": {
+        "input_tokens": 1128,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 88
+      }
+    },
+    {
+      "defect": "D07",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B02"
+      ],
+      "reason": "B02 states at the correct location that the vault card endpoint has no description (\"no description warns about sensitivity\"), which identifies the missing description as a problem, though framed around sensitivity.",
+      "candidates": [
+        "B02",
+        "B30"
+      ],
+      "usage": {
+        "input_tokens": 1012,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 92
+      }
+    },
+    {
+      "defect": "D08",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B21"
+      ],
+      "reason": "B21 points to GET /developer/v1/reimbursements param 'to_transaction_date' and states its description is just 'Data.', which is the planted uninformative description (the title's 'state filter' wording is off but the evidence identifies the problem).",
+      "candidates": [
+        "B09",
+        "B14",
+        "B21",
+        "B22",
+        "B29"
+      ],
+      "usage": {
+        "input_tokens": 1406,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 111
+      }
+    },
+    {
+      "defect": "D09",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B21"
+      ],
+      "reason": "B21's evidence states that include_merchant_data on the transaction detail endpoint has the vague description 'Data.', which is the planted problem, even though the finding's title and primary location focus on a different parameter.",
+      "candidates": [
+        "B13",
+        "B21",
+        "B26",
+        "B27"
+      ],
+      "usage": {
+        "input_tokens": 1234,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 97
+      }
+    },
+    {
+      "defect": "D10",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B01"
+      ],
+      "reason": "B01 flags the exact location and the planted problem: the mileage reimbursement POST declares security as an empty list, meaning no authentication, even though it is a financial write operation.",
+      "candidates": [
+        "B01"
+      ],
+      "usage": {
+        "input_tokens": 879,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 87
+      }
+    },
+    {
+      "defect": "D11",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B05"
+      ],
+      "reason": "B05 explicitly identifies that GET /developer/v1/cards/physical/{card_id} returns 201 instead of 200 for a read operation, matching the planted defect.",
+      "candidates": [
+        "B03",
+        "B05",
+        "B09",
+        "B31"
+      ],
+      "usage": {
+        "input_tokens": 1259,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 88
+      }
+    },
+    {
+      "defect": "D12",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B08"
+      ],
+      "reason": "B08 identifies that the 400 response on POST /developer/v1/cards/physical has a bare string schema, unlike the DeveloperApiErrorResponse used by other endpoints, which is exactly the planted defect.",
+      "candidates": [
+        "B06",
+        "B08",
+        "B14",
+        "B15",
+        "B20",
+        "B28"
+      ],
+      "usage": {
+        "input_tokens": 1478,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 103
+      }
+    },
+    {
+      "defect": "D13",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B04"
+      ],
+      "reason": "The finding identifies that the GET operation's summary says 'Permanently delete this resource' while the operation merely returns a VirtualCard, at the correct location.",
+      "candidates": [
+        "B04"
+      ],
+      "usage": {
+        "input_tokens": 879,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 82
+      }
+    },
+    {
+      "defect": "D14",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding mentions this location.",
+      "candidates": []
+    },
+    {
+      "defect": "D15",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding mentions this location.",
+      "candidates": []
+    },
+    {
+      "defect": "D16",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "None of the findings states that Transaction.sync_status is an unconstrained free-form string lacking enumerated valid values; B33 only mentions sync_status as a required readOnly field, which is a different problem.",
+      "candidates": [
+        "B13",
+        "B19",
+        "B23",
+        "B24",
+        "B26",
+        "B27",
+        "B33"
+      ],
+      "usage": {
+        "input_tokens": 1625,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 94
+      }
+    },
+    {
+      "defect": "D17",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B23"
+      ],
+      "reason": "B23 explicitly states that SingleTransaction.amount is type string while Transaction.amount is a number, which is the planted type inconsistency, although it is framed under deprecation.",
+      "candidates": [
+        "B23",
+        "B24",
+        "B25",
+        "B26"
+      ],
+      "usage": {
+        "input_tokens": 1307,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 89
+      }
+    },
+    {
+      "defect": "D18",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding mentions this location.",
+      "candidates": []
+    },
+    {
+      "defect": "D19",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B29"
+      ],
+      "reason": "B29 explicitly flags that /developer/v1/reimbursement/submit-receipt uses singular 'reimbursement' while other paths use plural /reimbursements, matching the planted defect.",
+      "candidates": [
+        "B28",
+        "B29"
+      ],
+      "usage": {
+        "input_tokens": 1103,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 95
+      }
+    }
+  ]
+}

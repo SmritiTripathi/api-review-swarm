@@ -1,0 +1,526 @@
+{
+  "run": "results/experiments/20261117-130543_claude-haiku-5-5/swarm_r2.json",
+  "method": "swarm",
+  "review_model": "claude-haiku-5-5",
+  "judge_model": "claude-sonnet-5-5",
+  "metrics": {
+    "defects": 19,
+    "hits": 14,
+    "partials": 0,
+    "recall": 0.737,
+    "recall_incl_partial": 0.737,
+    "severity_weighted_recall": 0.789,
+    "findings": 90,
+    "findings_matching_a_defect": 38
+  },
+  "verdicts": [
+    {
+      "defect": "D01",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P6-03",
+        "P1-05",
+        "P2-09",
+        "P6-02"
+      ],
+      "reason": "Several findings state at GET /developer/v1/cards/physical that the list endpoint has no pagination parameters (start/page_size) despite returning a paginated envelope, with P6-03 the most direct.",
+      "candidates": [
+        "P1-03",
+        "P1-05",
+        "P2-02",
+        "P2-06",
+        "P2-09",
+        "P2-15",
+        "P3-13",
+        "P3-14",
+        "P5-03",
+        "P5-05",
+        "P6-02",
+        "P6-03",
+        "P6-06"
+      ],
+      "usage": {
+        "input_tokens": 2731,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 114
+      }
+    },
+    {
+      "defect": "D02",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P1-06",
+        "P2-06",
+        "P5-11",
+        "P6-10"
+      ],
+      "reason": "Multiple findings explicitly flag that the 'userId' query parameter on GET /developer/v1/cards/virtual is camelCase while sibling parameters are snake_case.",
+      "candidates": [
+        "P1-05",
+        "P1-06",
+        "P2-06",
+        "P2-09",
+        "P3-10",
+        "P3-11",
+        "P5-03",
+        "P5-11",
+        "P6-02",
+        "P6-04",
+        "P6-05",
+        "P6-06",
+        "P6-10"
+      ],
+      "usage": {
+        "input_tokens": 2835,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 106
+      }
+    },
+    {
+      "defect": "D03",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P1-07",
+        "P2-07",
+        "P6-10"
+      ],
+      "reason": "P1-07, P2-07 and P6-10 each state that orderByAmountAsc on GET /developer/v1/transactions is camelCase while the sibling ordering parameters are snake_case.",
+      "candidates": [
+        "P1-07",
+        "P1-08",
+        "P2-07",
+        "P3-02",
+        "P3-06",
+        "P3-10",
+        "P3-11",
+        "P4-03",
+        "P5-10",
+        "P5-13",
+        "P6-02",
+        "P6-04",
+        "P6-05",
+        "P6-10",
+        "P6-12"
+      ],
+      "usage": {
+        "input_tokens": 3111,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 107
+      }
+    },
+    {
+      "defect": "D04",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P1-04"
+      ],
+      "reason": "P1-04 explicitly lists DELETE suspension among operations that document only a 200 response with no error responses, which matches the planted defect at the same location.",
+      "candidates": [
+        "P1-04",
+        "P4-15",
+        "P5-15"
+      ],
+      "usage": {
+        "input_tokens": 1257,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 82
+      }
+    },
+    {
+      "defect": "D05",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P1-02",
+        "P1-04",
+        "P3-14",
+        "P6-06"
+      ],
+      "reason": "Several findings explicitly state that PATCH /developer/v1/cards/physical/{card_id} documents no error responses (only 200), which is the planted defect of the removed 400 response.",
+      "candidates": [
+        "P1-01",
+        "P1-02",
+        "P1-04",
+        "P2-14",
+        "P3-13",
+        "P3-14",
+        "P4-14",
+        "P5-05",
+        "P5-15",
+        "P6-06",
+        "P6-09"
+      ],
+      "usage": {
+        "input_tokens": 2462,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 108
+      }
+    },
+    {
+      "defect": "D06",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "None of the findings notes that POST /developer/v1/cards/vault lacks a description or explanation beyond its summary; they all address other issues such as idempotency, security, or response codes.",
+      "candidates": [
+        "P2-02",
+        "P2-04",
+        "P2-05",
+        "P3-03",
+        "P3-12",
+        "P3-13",
+        "P5-06",
+        "P5-07",
+        "P6-06",
+        "P6-07",
+        "P6-08"
+      ],
+      "usage": {
+        "input_tokens": 2525,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 87
+      }
+    },
+    {
+      "defect": "D07",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding notes that GET /developer/v1/cards/vault/{card_id} lacks a description; the findings cover missing error responses, PAN/CVV exposure, default security, and vault creation, none of which concern the missing description.",
+      "candidates": [
+        "P1-02",
+        "P2-01",
+        "P2-04",
+        "P5-06"
+      ],
+      "usage": {
+        "input_tokens": 1474,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 102
+      }
+    },
+    {
+      "defect": "D08",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P4-08",
+        "P6-13",
+        "P2-13",
+        "P6-12",
+        "P4-07"
+      ],
+      "reason": "Multiple findings explicitly state that GET /developer/v1/reimbursements 'to_transaction_date' has the placeholder description 'Data.', which is the planted uninformative-description defect.",
+      "candidates": [
+        "P1-08",
+        "P1-13",
+        "P1-15",
+        "P2-06",
+        "P2-13",
+        "P3-05",
+        "P3-10",
+        "P3-11",
+        "P4-07",
+        "P4-08",
+        "P5-10",
+        "P5-11",
+        "P5-12",
+        "P6-04",
+        "P6-05",
+        "P6-12",
+        "P6-13",
+        "P6-15"
+      ],
+      "usage": {
+        "input_tokens": 3269,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 117
+      }
+    },
+    {
+      "defect": "D09",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P2-13",
+        "P4-08",
+        "P6-13"
+      ],
+      "reason": "P2-13, P4-08 and P6-13 each state that include_merchant_data on GET /transactions/{transaction_id} has the placeholder description 'Data.', which is the planted uninformative description.",
+      "candidates": [
+        "P1-02",
+        "P1-04",
+        "P2-13",
+        "P3-09",
+        "P4-08",
+        "P4-10",
+        "P5-08",
+        "P6-12",
+        "P6-13",
+        "P6-14"
+      ],
+      "usage": {
+        "input_tokens": 2343,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 109
+      }
+    },
+    {
+      "defect": "D10",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P2-03",
+        "P2-04",
+        "P5-01"
+      ],
+      "reason": "P2-03, P2-04 and P5-01 each state that POST /developer/v1/reimbursements/mileage has security: [] (no authentication or scope) while sibling write operations require oauth2 scopes.",
+      "candidates": [
+        "P1-04",
+        "P2-03",
+        "P2-04",
+        "P2-15",
+        "P5-01",
+        "P5-02",
+        "P6-06"
+      ],
+      "usage": {
+        "input_tokens": 1889,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 112
+      }
+    },
+    {
+      "defect": "D11",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P1-01",
+        "P3-13",
+        "P5-05"
+      ],
+      "reason": "P1-01 directly states that GET /cards/physical/{card_id} documents 201 instead of 200, and P3-13 and P5-05 also flag the 201 on this GET as inconsistent with 200 on other GETs.",
+      "candidates": [
+        "P1-01",
+        "P1-02",
+        "P1-04",
+        "P2-14",
+        "P3-13",
+        "P3-14",
+        "P4-14",
+        "P5-05",
+        "P5-15",
+        "P6-06",
+        "P6-09"
+      ],
+      "usage": {
+        "input_tokens": 2477,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 117
+      }
+    },
+    {
+      "defect": "D12",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P2-15",
+        "P3-14",
+        "P5-05",
+        "P6-06",
+        "P1-03"
+      ],
+      "reason": "Several findings (P2-15, P3-14, P5-05, P6-06) explicitly note the POST /cards/physical 400 uses a plain string schema while other 400s use DeveloperApiErrorResponse, matching the planted defect; P1-03 also flags the string schema at the same location.",
+      "candidates": [
+        "P1-03",
+        "P1-05",
+        "P2-02",
+        "P2-06",
+        "P2-09",
+        "P2-15",
+        "P3-13",
+        "P3-14",
+        "P5-03",
+        "P5-05",
+        "P6-02",
+        "P6-03",
+        "P6-06"
+      ],
+      "usage": {
+        "input_tokens": 2741,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 149
+      }
+    },
+    {
+      "defect": "D13",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P2-14",
+        "P3-15",
+        "P4-13",
+        "P5-04",
+        "P6-09"
+      ],
+      "reason": "Each of these findings flags that the GET /developer/v1/cards/virtual/{card_id} summary says 'Permanently delete this resource' while the operation is a read-only GET returning a VirtualCard.",
+      "candidates": [
+        "P2-14",
+        "P3-15",
+        "P4-13",
+        "P5-04",
+        "P6-09"
+      ],
+      "usage": {
+        "input_tokens": 1340,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 121
+      }
+    },
+    {
+      "defect": "D14",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "Neither finding says that 'distance' is missing from the required list of ApiMileageReimbursementCreateRequestBody: P1-10 is about the Reimbursement response schema's required list, and P2-08 is about inconsistent naming (spend_allocation_id).",
+      "candidates": [
+        "P1-10",
+        "P2-08"
+      ],
+      "usage": {
+        "input_tokens": 1164,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 116
+      }
+    },
+    {
+      "defect": "D15",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "The finding mentions ApiPhysicalCardCreateResourceRequestBody.shipping_address but only complains about missing format/enum constraints on address sub-fields; it never says shipping_address should be required.",
+      "candidates": [
+        "P3-04"
+      ],
+      "usage": {
+        "input_tokens": 946,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 96
+      }
+    },
+    {
+      "defect": "D16",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding notes that Transaction.sync_status is an unconstrained string lacking an enum of valid values; sync-related findings only discuss filter precedence on reimbursements.",
+      "candidates": [
+        "P1-07",
+        "P1-11",
+        "P1-12",
+        "P1-13",
+        "P2-08",
+        "P2-11",
+        "P2-13",
+        "P3-01",
+        "P3-02",
+        "P3-06",
+        "P3-08",
+        "P4-02",
+        "P4-04",
+        "P4-05",
+        "P4-06",
+        "P5-08",
+        "P5-09",
+        "P5-12",
+        "P5-13",
+        "P6-10",
+        "P6-11"
+      ],
+      "usage": {
+        "input_tokens": 3942,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 85
+      }
+    },
+    {
+      "defect": "D17",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P1-11",
+        "P2-11",
+        "P3-01",
+        "P4-05"
+      ],
+      "reason": "Several findings explicitly flag SingleTransaction.amount as type string while Transaction.amount is number, identifying the planted type inconsistency at the right location.",
+      "candidates": [
+        "P1-04",
+        "P1-11",
+        "P1-12",
+        "P2-07",
+        "P2-11",
+        "P2-12",
+        "P3-01",
+        "P3-02",
+        "P3-03",
+        "P3-06",
+        "P3-09",
+        "P4-05",
+        "P4-10",
+        "P5-08",
+        "P5-09",
+        "P6-11"
+      ],
+      "usage": {
+        "input_tokens": 3268,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 100
+      }
+    },
+    {
+      "defect": "D18",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P2-02"
+      ],
+      "reason": "The finding explicitly cites CardShipping.full_card_number as exposing the full card number in physical card responses accessible with only cards:read, matching the planted defect's location and problem.",
+      "candidates": [
+        "P2-02"
+      ],
+      "usage": {
+        "input_tokens": 945,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 91
+      }
+    },
+    {
+      "defect": "D19",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "P1-15"
+      ],
+      "reason": "P1-15 explicitly flags that the submit-receipt path uses singular 'reimbursement' while other reimbursement paths use plural 'reimbursements', matching the planted defect.",
+      "candidates": [
+        "P1-14",
+        "P1-15",
+        "P2-05",
+        "P3-12",
+        "P5-07",
+        "P5-14",
+        "P6-07"
+      ],
+      "usage": {
+        "input_tokens": 1866,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 94
+      }
+    }
+  ]
+}

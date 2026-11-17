@@ -1,0 +1,511 @@
+{
+  "run": "results/experiments/20261117-130543_claude-haiku-5-5/control_r3.json",
+  "method": "control",
+  "review_model": "claude-haiku-5-5",
+  "judge_model": "claude-sonnet-5-5",
+  "metrics": {
+    "defects": 19,
+    "hits": 13,
+    "partials": 2,
+    "recall": 0.684,
+    "recall_incl_partial": 0.789,
+    "severity_weighted_recall": 0.737,
+    "findings": 86,
+    "findings_matching_a_defect": 50
+  },
+  "verdicts": [
+    {
+      "defect": "D01",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-07",
+        "G4-10",
+        "G5-08",
+        "G6-11"
+      ],
+      "reason": "Several findings state that GET /developer/v1/cards/physical has no start/page_size pagination parameters, even though it returns a paginated response, which is exactly the planted defect.",
+      "candidates": [
+        "G1-02",
+        "G1-07",
+        "G1-13",
+        "G2-03",
+        "G2-06",
+        "G2-10",
+        "G3-01",
+        "G3-12",
+        "G4-03",
+        "G4-10",
+        "G4-12",
+        "G5-04",
+        "G5-08",
+        "G6-04",
+        "G6-11"
+      ],
+      "usage": {
+        "input_tokens": 2677,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 105
+      }
+    },
+    {
+      "defect": "D02",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-06",
+        "G2-03",
+        "G3-07",
+        "G4-09",
+        "G5-09",
+        "G6-09"
+      ],
+      "reason": "Several findings explicitly flag that GET /developer/v1/cards/virtual uses camelCase 'userId' while the other query parameters use snake_case 'user_id', which is exactly the planted defect.",
+      "candidates": [
+        "G1-06",
+        "G1-07",
+        "G2-02",
+        "G2-03",
+        "G3-06",
+        "G3-07",
+        "G4-09",
+        "G5-08",
+        "G5-09",
+        "G6-09",
+        "G6-10"
+      ],
+      "usage": {
+        "input_tokens": 2414,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 125
+      }
+    },
+    {
+      "defect": "D03",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-06",
+        "G3-07",
+        "G4-09",
+        "G5-09",
+        "G6-09"
+      ],
+      "reason": "Multiple findings explicitly flag that 'orderByAmountAsc' on GET /developer/v1/transactions is camelCase while sibling parameters like 'order_by_amount_desc' and 'user_id' use snake_case.",
+      "candidates": [
+        "G1-06",
+        "G1-07",
+        "G2-02",
+        "G2-04",
+        "G3-06",
+        "G3-07",
+        "G4-09",
+        "G5-09",
+        "G5-11",
+        "G6-08",
+        "G6-09",
+        "G6-10"
+      ],
+      "usage": {
+        "input_tokens": 2559,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 130
+      }
+    },
+    {
+      "defect": "D04",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "Both findings concern operation summaries and descriptions for the suspension DELETE; neither notes that it documents no 4xx/5xx error responses.",
+      "candidates": [
+        "G2-12",
+        "G6-07"
+      ],
+      "usage": {
+        "input_tokens": 1145,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 76
+      }
+    },
+    {
+      "defect": "D05",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-13",
+        "G2-06"
+      ],
+      "reason": "G1-13 and G2-06 both state that PATCH /cards/physical/{card_id} documents only a 200 (no 400 or other error responses), which describes the planted removal of the documented 400 error response at the right location.",
+      "candidates": [
+        "G1-03",
+        "G1-05",
+        "G1-13",
+        "G2-05",
+        "G2-06",
+        "G3-02",
+        "G4-04",
+        "G5-02",
+        "G5-04",
+        "G6-05"
+      ],
+      "usage": {
+        "input_tokens": 1950,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 109
+      }
+    },
+    {
+      "defect": "D06",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding says the POST /developer/v1/cards/vault operation lacks a description; G2-08 notes that no description warns about PAN/CVV handling, but that is a different problem and does not state the operation has no description beyond its summary.",
+      "candidates": [
+        "G1-10",
+        "G1-11",
+        "G2-05",
+        "G2-08",
+        "G2-14",
+        "G3-11",
+        "G5-05",
+        "G6-01",
+        "G6-02",
+        "G6-03",
+        "G6-13"
+      ],
+      "usage": {
+        "input_tokens": 2256,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 103
+      }
+    },
+    {
+      "defect": "D07",
+      "verdict": "partial",
+      "matched_finding_ids": [
+        "G2-08",
+        "G3-14",
+        "G5-06"
+      ],
+      "reason": "These findings target GET /cards/vault/{card_id} and say it has no description of PCI handling, sensitivity or caching, which implies the missing description, but none says the operation lacks a description beyond its summary.",
+      "candidates": [
+        "G2-06",
+        "G2-08",
+        "G3-14",
+        "G5-06",
+        "G6-13"
+      ],
+      "usage": {
+        "input_tokens": 1497,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 303
+      }
+    },
+    {
+      "defect": "D08",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G2-14",
+        "G4-14"
+      ],
+      "reason": "G4-14 and G2-14 both identify that to_transaction_date on GET /developer/v1/reimbursements has the uninformative description 'Data.', which is exactly the planted defect.",
+      "candidates": [
+        "G1-06",
+        "G1-07",
+        "G2-02",
+        "G2-03",
+        "G2-09",
+        "G2-14",
+        "G3-10",
+        "G4-08",
+        "G4-13",
+        "G4-14",
+        "G5-10",
+        "G5-13",
+        "G6-10"
+      ],
+      "usage": {
+        "input_tokens": 2577,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 100
+      }
+    },
+    {
+      "defect": "D09",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G4-14",
+        "G2-14"
+      ],
+      "reason": "G4-14 directly flags that include_merchant_data on GET /transactions/{transaction_id} is described only as 'Data.' and gives the developer no meaning; G2-14 also mentions the 'Data.' description for this parameter, though less clearly.",
+      "candidates": [
+        "G1-01",
+        "G1-14",
+        "G2-01",
+        "G2-13",
+        "G2-14",
+        "G3-04",
+        "G3-05",
+        "G4-01",
+        "G4-02",
+        "G4-14",
+        "G5-01",
+        "G6-01"
+      ],
+      "usage": {
+        "input_tokens": 2272,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 121
+      }
+    },
+    {
+      "defect": "D10",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-12",
+        "G3-13",
+        "G4-06",
+        "G5-07",
+        "G6-12",
+        "G2-07"
+      ],
+      "reason": "Multiple findings explicitly flag that POST mileage sets security: [] (no authentication) on a write operation that creates financial reimbursements, matching the planted defect.",
+      "candidates": [
+        "G1-12",
+        "G2-06",
+        "G2-07",
+        "G3-13",
+        "G4-06",
+        "G5-07",
+        "G6-12"
+      ],
+      "usage": {
+        "input_tokens": 1556,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 113
+      }
+    },
+    {
+      "defect": "D11",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-03",
+        "G2-05",
+        "G3-02",
+        "G4-04",
+        "G6-05",
+        "G5-04"
+      ],
+      "reason": "Multiple findings identify at the exact location (GET /cards/physical/{card_id}) that a read-only GET documents 201 instead of 200, matching the planted defect.",
+      "candidates": [
+        "G1-03",
+        "G1-05",
+        "G1-13",
+        "G2-05",
+        "G2-06",
+        "G3-02",
+        "G4-04",
+        "G5-02",
+        "G5-04",
+        "G6-05"
+      ],
+      "usage": {
+        "input_tokens": 1965,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 114
+      }
+    },
+    {
+      "defect": "D12",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-02",
+        "G1-13",
+        "G2-06",
+        "G3-12",
+        "G4-03",
+        "G6-04"
+      ],
+      "reason": "Several findings state that the POST /developer/v1/cards/physical 400 response is a bare string schema, unlike the DeveloperApiErrorResponse used by other errors, which is exactly the planted defect.",
+      "candidates": [
+        "G1-02",
+        "G1-07",
+        "G1-13",
+        "G2-03",
+        "G2-06",
+        "G2-10",
+        "G3-01",
+        "G3-12",
+        "G4-03",
+        "G4-10",
+        "G4-12",
+        "G5-04",
+        "G5-08",
+        "G6-04",
+        "G6-11"
+      ],
+      "usage": {
+        "input_tokens": 2687,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 126
+      }
+    },
+    {
+      "defect": "D13",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-04",
+        "G2-12",
+        "G3-03",
+        "G4-05",
+        "G5-03",
+        "G6-06"
+      ],
+      "reason": "Every finding identifies that the GET /developer/v1/cards/virtual/{card_id} summary says 'Permanently delete this resource' even though the operation is a read-only GET returning a VirtualCard.",
+      "candidates": [
+        "G1-04",
+        "G2-12",
+        "G3-03",
+        "G4-05",
+        "G5-03",
+        "G6-06"
+      ],
+      "usage": {
+        "input_tokens": 1464,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 126
+      }
+    },
+    {
+      "defect": "D14",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding mentions this location.",
+      "candidates": []
+    },
+    {
+      "defect": "D15",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding mentions this location.",
+      "candidates": []
+    },
+    {
+      "defect": "D16",
+      "verdict": "partial",
+      "matched_finding_ids": [
+        "G1-09"
+      ],
+      "reason": "G1-09 cites Transaction.sync_status and says it has no type-level 'enum', but the evidence is muddled and focused on nullability and required-list inconsistencies, so the missing allowed values are only loosely implied.",
+      "candidates": [
+        "G1-01",
+        "G1-08",
+        "G1-09",
+        "G1-14",
+        "G2-01",
+        "G2-04",
+        "G2-11",
+        "G2-13",
+        "G3-04",
+        "G3-05",
+        "G3-08",
+        "G4-01",
+        "G4-02",
+        "G4-11",
+        "G4-13",
+        "G5-01",
+        "G5-10",
+        "G5-11",
+        "G5-14",
+        "G6-01",
+        "G6-15"
+      ],
+      "usage": {
+        "input_tokens": 3394,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 295
+      }
+    },
+    {
+      "defect": "D17",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G1-08",
+        "G2-11",
+        "G4-11",
+        "G5-14",
+        "G6-15"
+      ],
+      "reason": "Multiple findings explicitly state that SingleTransaction.amount is a string while Transaction.amount is a number, which is the planted type inconsistency at the right location.",
+      "candidates": [
+        "G1-08",
+        "G1-09",
+        "G2-11",
+        "G4-11",
+        "G5-14",
+        "G6-15"
+      ],
+      "usage": {
+        "input_tokens": 1502,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 107
+      }
+    },
+    {
+      "defect": "D18",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G6-14",
+        "G2-08"
+      ],
+      "reason": "G6-14 directly flags CardShipping.full_card_number as exposing the full card number in physical card responses, and G2-08 also names CardShipping.full_card_number as exposing full card numbers.",
+      "candidates": [
+        "G2-08",
+        "G6-14"
+      ],
+      "usage": {
+        "input_tokens": 1044,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 103
+      }
+    },
+    {
+      "defect": "D19",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "G3-10",
+        "G4-08",
+        "G5-13",
+        "G1-11"
+      ],
+      "reason": "Findings G3-10, G4-08, and G5-13 each state that the submit-receipt path uses singular 'reimbursement' while sibling paths use plural 'reimbursements', and G1-11 also notes this in its evidence.",
+      "candidates": [
+        "G1-11",
+        "G3-09",
+        "G3-10",
+        "G4-07",
+        "G4-08",
+        "G5-12",
+        "G5-13",
+        "G6-02"
+      ],
+      "usage": {
+        "input_tokens": 1847,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 124
+      }
+    }
+  ]
+}

@@ -1,0 +1,326 @@
+{
+  "run": "results/experiments/20261117-130543_claude-haiku-5-5/baseline_r3.json",
+  "method": "baseline",
+  "review_model": "claude-haiku-5-5",
+  "judge_model": "claude-sonnet-5-5",
+  "metrics": {
+    "defects": 19,
+    "hits": 12,
+    "partials": 0,
+    "recall": 0.632,
+    "recall_incl_partial": 0.632,
+    "severity_weighted_recall": 0.658,
+    "findings": 27,
+    "findings_matching_a_defect": 12
+  },
+  "verdicts": [
+    {
+      "defect": "D01",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B14"
+      ],
+      "reason": "B14 flags that GET /developer/v1/cards/physical declares no start or page_size pagination parameters despite returning a paginated response, which is exactly the planted defect.",
+      "candidates": [
+        "B06",
+        "B14"
+      ],
+      "usage": {
+        "input_tokens": 972,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 87
+      }
+    },
+    {
+      "defect": "D02",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B09"
+      ],
+      "reason": "B09 flags that query parameter 'userId' on GET /developer/v1/cards/virtual is camelCase while other params are snake_case, which is exactly the planted defect.",
+      "candidates": [
+        "B09",
+        "B13"
+      ],
+      "usage": {
+        "input_tokens": 1012,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 88
+      }
+    },
+    {
+      "defect": "D03",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B10"
+      ],
+      "reason": "B10 flags 'orderByAmountAsc' on GET /developer/v1/transactions as camelCase, inconsistent with the snake_case sort parameters elsewhere, which is exactly the planted defect.",
+      "candidates": [
+        "B10",
+        "B12",
+        "B17"
+      ],
+      "usage": {
+        "input_tokens": 1113,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 101
+      }
+    },
+    {
+      "defect": "D04",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding mentions this location.",
+      "candidates": []
+    },
+    {
+      "defect": "D05",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B07"
+      ],
+      "reason": "B07 identifies that the PATCH on /developer/v1/cards/physical/{card_id} declares only a 200 response and lacks error responses such as 400, which is the planted defect.",
+      "candidates": [
+        "B04",
+        "B07"
+      ],
+      "usage": {
+        "input_tokens": 948,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 91
+      }
+    },
+    {
+      "defect": "D06",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "Neither finding says the vault POST lacks a description; B02 only critiques the summary versus the response and the path name, and B21 is about idempotency key inconsistency.",
+      "candidates": [
+        "B02",
+        "B21"
+      ],
+      "usage": {
+        "input_tokens": 1048,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 82
+      }
+    },
+    {
+      "defect": "D07",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding mentions this location.",
+      "candidates": []
+    },
+    {
+      "defect": "D08",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B23",
+        "B24"
+      ],
+      "reason": "Both B23 and B24 explicitly note that the to_transaction_date description is just 'Data.', which is an uninformative placeholder, at the correct parameter.",
+      "candidates": [
+        "B11",
+        "B23",
+        "B24"
+      ],
+      "usage": {
+        "input_tokens": 1130,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 87
+      }
+    },
+    {
+      "defect": "D09",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B24"
+      ],
+      "reason": "B24 explicitly flags the 'Data.' placeholder description on include_merchant_data in GET /developer/v1/transactions/{transaction_id} as conveying no meaning.",
+      "candidates": [
+        "B08",
+        "B20",
+        "B24"
+      ],
+      "usage": {
+        "input_tokens": 1147,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 91
+      }
+    },
+    {
+      "defect": "D10",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B01"
+      ],
+      "reason": "B01 identifies that the mileage POST has security:[] (no authentication) at the correct location, contrasting it with other write endpoints requiring oauth2.",
+      "candidates": [
+        "B01"
+      ],
+      "usage": {
+        "input_tokens": 872,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 82
+      }
+    },
+    {
+      "defect": "D11",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B04"
+      ],
+      "reason": "B04 identifies that the GET on /developer/v1/cards/physical/{card_id} returns 201 instead of 200, which is the planted defect at the right location.",
+      "candidates": [
+        "B04",
+        "B07"
+      ],
+      "usage": {
+        "input_tokens": 963,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 84
+      }
+    },
+    {
+      "defect": "D12",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B06"
+      ],
+      "reason": "B06 identifies that the POST /developer/v1/cards/physical 400 response is a plain string schema, inconsistent with the DeveloperApiErrorResponse used by other endpoints.",
+      "candidates": [
+        "B06",
+        "B14"
+      ],
+      "usage": {
+        "input_tokens": 982,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 94
+      }
+    },
+    {
+      "defect": "D13",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B05"
+      ],
+      "reason": "The finding identifies at the exact location that the summary says 'Permanently delete this resource' while the operation is a read-only GET returning the card.",
+      "candidates": [
+        "B05"
+      ],
+      "usage": {
+        "input_tokens": 879,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 76
+      }
+    },
+    {
+      "defect": "D14",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "Neither finding says that 'distance' should be required but is not; B18 covers the oneOf typing and missing units description, and B19 covers spend_allocation_id naming and nullability.",
+      "candidates": [
+        "B18",
+        "B19"
+      ],
+      "usage": {
+        "input_tokens": 997,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 87
+      }
+    },
+    {
+      "defect": "D15",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "The only candidate finding concerns the fund_id and automatic_routing_enabled mutual exclusion, and never mentions shipping_address missing from the required fields.",
+      "candidates": [
+        "B27"
+      ],
+      "usage": {
+        "input_tokens": 962,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 81
+      }
+    },
+    {
+      "defect": "D16",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "None of the findings mention that Transaction.sync_status is an unconstrained free-form string lacking enumerated valid values.",
+      "candidates": [
+        "B08",
+        "B12",
+        "B16",
+        "B20",
+        "B23",
+        "B25"
+      ],
+      "usage": {
+        "input_tokens": 1482,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 68
+      }
+    },
+    {
+      "defect": "D17",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B16"
+      ],
+      "reason": "B16's evidence states that SingleTransaction's amount is a string while Transaction's amount is a number, which is the planted type inconsistency, even though the finding is filed under the Transaction schema.",
+      "candidates": [
+        "B16",
+        "B17",
+        "B19",
+        "B25"
+      ],
+      "usage": {
+        "input_tokens": 1163,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 364
+      }
+    },
+    {
+      "defect": "D18",
+      "verdict": "miss",
+      "matched_finding_ids": [],
+      "reason": "No finding mentions this location.",
+      "candidates": []
+    },
+    {
+      "defect": "D19",
+      "verdict": "hit",
+      "matched_finding_ids": [
+        "B22"
+      ],
+      "reason": "B22 identifies that the submit-receipt path uses singular 'reimbursement' while other reimbursement paths use plural '/reimbursements/', which is exactly the planted defect.",
+      "candidates": [
+        "B21",
+        "B22"
+      ],
+      "usage": {
+        "input_tokens": 1108,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 0,
+        "output_tokens": 91
+      }
+    }
+  ]
+}
