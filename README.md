@@ -2,7 +2,7 @@
 
 An evaluation harness that measures whether a **multi-agent persona swarm** finds more real defects in an OpenAPI spec than a **single-pass LLM review**, and at what cost in tokens and latency.
 
-> **Status:** in progress. The benchmark, baseline reviewer, persona generation and parallel swarm are working; finding aggregation, the scorer and the experiments are next.
+> **Status:** in progress. The benchmark, baseline reviewer, persona generation and parallel swarm are working, and an LLM judge scores every run against the answer key. Repeated runs, the same-budget baseline and Sonnet reviews are next.
 
 ## Highlights
 
@@ -36,7 +36,7 @@ spec + planted defects ─┬─► Baseline: 1 general reviewer ─────
 | Personas       | `src/personas.py`      | Generates distinct reviewer personas from seeded attributes                  |
 | Swarm          | `src/swarm.py`         | Parallel persona reviews with a cached shared spec and per-reviewer failure isolation |
 | Aggregator     | `src/aggregate.py`     | *Planned:* merges duplicate findings across reviewers                        |
-| Scorer         | `src/score.py`         | *Planned:* location matching plus an LLM judge validated against hand labels |
+| Scorer         | `src/score.py`         | Location filter plus an LLM judge (Sonnet 5.5), validated against hand labels |
 
 
 ## Benchmark
@@ -57,22 +57,25 @@ A slice of Ramp's public Developer API (13 paths, 18 operations: cards, transact
 
 ## Results
 
-Recall is *pending* until the scorer is built. Token and latency figures come from the run files listed below.
+All runs are scored by the same judge (`claude-sonnet-5-5`), which agreed with hand labels on 18 of 19 defects. Token and latency figures come from the run files listed; scores from the matching files in `results/scores/`. Each row is a **single run**: repeated runs are next.
 
-| Method | Model | Findings (raw) | Recall | Total input tokens | Cached share | Billed-input equivalent¹ | Output tokens | Latency | Run file |
-|---|---|--:|--:|--:|--:|--:|--:|--:|---|
-| Baseline | claude-haiku-5-5 | 33 | pending | 71,214 | 0% | 71,214 | 5,478 | 22.2 s | `baseline_claude-haiku-5-5_20261116-114835.json` |
-| Swarm (6 personas) | claude-haiku-5-5 | 87 | pending | 428,841 | 99% | 128,162 | 18,100 | 29.2 s | `swarm_claude-haiku-5-5_20261116-130554.json` |
-| Baseline | claude-sonnet-5-5 | | | | | | | | not yet run |
-| Swarm (6 personas) | claude-sonnet-5-5 | | | | | | | | not yet run |
-| Same-budget baseline | claude-sonnet-5-5 | | | | | | | | not yet run |
+| Method | Model | Findings (raw) | Recall | Severity-weighted recall | Total input tokens | Cached share | Billed-input equivalent¹ | Output tokens | Latency | Run file |
+|---|---|--:|--:|--:|--:|--:|--:|--:|--:|---|
+| Baseline | claude-haiku-5-5 | 33 | 14/19 (74%) | 71% | 71,214 | 0% | 71,214 | 5,478 | 22.2 s | `baseline_claude-haiku-5-5_20261116-114835.json` |
+| Swarm (6 personas) | claude-haiku-5-5 | 87 | 14/19 (74%) | 79% | 428,841 | 99% | 128,162 | 18,100 | 29.2 s | `swarm_claude-haiku-5-5_20261116-130554.json` |
+| Same-budget baseline | claude-haiku-5-5 | | | | | | | | | not yet run |
+| Baseline | claude-sonnet-5-5 | | | | | | | | | not yet run |
+| Swarm (6 personas) | claude-sonnet-5-5 | | | | | | | | | not yet run |
 
 ¹ Input tokens weighted by their price relative to uncached input: cache writes ×1.25, cache reads ×0.1 (Haiku 5.5 rates from Anthropic's prompt-caching docs). It compares input cost across runs without depending on dollar prices.
 
-**First observations (one run each, before scoring):**
-- The swarm read 6× the input of the baseline, but caching brought its billed-input equivalent to **1.8×** (a 70% saving versus no cache).
-- Running five personas in parallel after a cache-warming first call kept latency to **1.3×** the baseline's.
-- Raw finding counts measure volume, not quality: many of the 87 swarm findings will be duplicates. Recall against the answer key is the real comparison.
+**First observations (one run each):**
+- **Same recall, different defects.** Both caught 14 of 19, but not the same 14. Only the swarm caught a full card number exposed in a response (severity 3, found by the security-engineer persona) and missing error responses on an unsuspend endpoint. Only the baseline caught two missing operation descriptions (severity 1). Together they caught 16 of 19.
+- **The swarm caught the more serious defects:** severity-weighted recall 79% vs 71%.
+- **Neither caught three schema defects** where something was *removed*: two `required` markers and an enum.
+- **Cost:** the swarm used 1.8× the baseline's price-weighted input (caching saved 70%), 3.3× the output tokens and 1.3× the latency.
+- **Duplication:** only 36 of the swarm's 87 findings match a planted defect, and many of those repeat each other (five personas reported the same camelCase parameter).
+- **Not yet conclusive:** with one run each, a 2-defect difference may be noise. The same-budget baseline and repeated runs will show whether the personas, rather than extra attempts, explain the difference.
 
 ## Quick start
 
@@ -96,7 +99,7 @@ Rebuilding the spec slice from the source, and the reasoning behind each design 
 - [x] Persona generation
 - [x] Parallel swarm with prompt caching and failure isolation
 - [ ] Aggregation: merge duplicate findings across reviewers
-- [ ] Scorer, with the LLM judge validated against hand-labelled matches
+- [x] Scorer, with the LLM judge validated against hand-labelled matches (18/19 agreement)
 - [ ] Experiments across models, with repeated runs
 - [ ] Extensions: grounding check on finding locations; tool-using reviewers; prompt-injection robustness
 
